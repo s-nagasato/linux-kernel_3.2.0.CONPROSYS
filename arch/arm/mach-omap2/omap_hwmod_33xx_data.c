@@ -15,6 +15,7 @@
  */
 
 // update 2015.07.22 nmi
+// update 2015.10.01 spi1 cs3(mc341B40)
 
 #include <linux/io.h>
 #include <linux/slab.h>
@@ -2316,6 +2317,9 @@ struct omap_hwmod_dma_info am33xx_mcspi1_edma_reqs[] = {
 	{ .name = "tx0", .dma_req = 42 },
 	{ .name = "rx1", .dma_req = 45 },
 	{ .name = "tx1", .dma_req = 44 },
+// update 2015.10.01
+	{ .name = "rx2", .dma_req = 80 },
+	{ .name = "tx2", .dma_req = 81 },
 	{ .dma_req = -1 }
 };
 
@@ -2339,6 +2343,11 @@ struct omap_hwmod_ocp_if am33xx_l4_core__mcspi1 = {
 static struct omap_hwmod_ocp_if *am33xx_mcspi1_slaves[] = {
 	&am33xx_l4_core__mcspi1,
 };
+// update 2015.10.01
+struct omap2_mcspi_dev_attr mcspi1_attrib = {
+	.num_chipselect = 3,
+};
+
 static struct omap_hwmod am33xx_spi1_hwmod = {
 	.name		= "spi1",
 	.class		= &am33xx_spi_hwmod_class,
@@ -2352,7 +2361,7 @@ static struct omap_hwmod am33xx_spi1_hwmod = {
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
-	.dev_attr	= &mcspi_attrib,
+	.dev_attr	= &mcspi1_attrib,
 	.slaves		= am33xx_mcspi1_slaves,
 	.slaves_cnt	= ARRAY_SIZE(am33xx_mcspi1_slaves),
 };

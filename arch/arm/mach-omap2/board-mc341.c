@@ -1,7 +1,8 @@
 /*
  * Code for MC341.
  *
- * Copyright (C) 2011 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright (C) 2015 CONTEC/CO/Ltd. - http://www.contec.co.jp/
+ * Based by board-am34xevm.c. 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,6 +38,7 @@
 //	update 2015.09.01 add MC341B-40 
 // update 2015.09.10 gpio1_7 output (with MC341B-40) 
 //	                  spi0_slave_info added (with MC341B-40)
+// update 2015.10.01 spi1 digital potentiometer (with MC341B-40)
 
 //#define MC341LAN2 (1)
 #define MC341
@@ -1022,6 +1024,11 @@ static struct gpio_led gpio_leds[] = {
 		.name			= "MC341B-40:AO_SW_En",
 		.gpio			= GPIO_TO_PIN(1, 15),
 	},
+	//update 2015.10.01 digital potentiometer add
+	{
+		.name			= "MC341B-40:SPI-POT-CS",
+		.gpio			= GPIO_TO_PIN(3, 4),
+	},
 #endif
 };
 
@@ -1115,18 +1122,26 @@ static struct spi_board_info mc341b40_spi0_slave_info[] = {
         { // AI( ADS8326 )
 
                 .modalias       = "spidev",
-                .max_speed_hz   = 5300000, //5.3 Mbps
+                .max_speed_hz   = 5300000, //5.3 MHz
                 .bus_num        = 2,
                 .chip_select    = 0,
                 .mode = SPI_MODE_0,
         },
         { // AO( DAC161S055)
                 .modalias       = "spidev",
-                .max_speed_hz   = 16000000, //16 Mbps
+                .max_speed_hz   = 16000000, //16 MHz
                 .bus_num        = 2,
                 .chip_select    = 1,
                 .mode = SPI_MODE_0,
         },
+	// update 2015.10.01
+	{ // Digital Potentiometer (AD5206)
+		.modalias	= "spidev",
+		.max_speed_hz	= 24000000, // 24MHz
+		.bus_num	= 2,
+		.chip_select	= 2, // Real ChipSelect GPIO(3-4)
+		.mode		= SPI_MODE_0,
+	},
 };
 
 /* pinmux for usb0 drvvbus */
@@ -1753,15 +1768,34 @@ static struct i2c_board_info __initdata mc341_i2c0_boardinfo[] = {
 //		I2C_BOARD_INFO("rtc-rx8900", 0x32), // RTC
 		I2C_BOARD_INFO("rx8900", 0x32), // RTC
 	},
-
+// update 2015.11.05 Add Power Monitor (CPS-MCS341-DSX)
+	{
+//		I2C_BOARD_INFO("rtc-mcp7940", 0x6f), // RTC
+		I2C_BOARD_INFO("ina226", 0x40), // RTC
+	},
 };
 
 // update 2015.03.16 RFID add
 // 0x54 RFID
 static struct i2c_board_info __initdata mc341_i2c1_boardinfo[] = {
+
+// update 2015.11.05 I2C Update
 	{
+		I2C_BOARD_INFO("INF-MC341-10(RS485)", 0x50),
+	},
+	{
+		I2C_BOARD_INFO("JIG-MC341-00(3G)", 0x51),
+	},
+	{
+		I2C_BOARD_INFO("JIG-MC341-00(NFC)", 0x52),
+	},
+	{
+// update 2015.11.05 End	
 		I2C_BOARD_INFO("rfid", 0x54), // RFID
 	},
+
+
+
 };
 // update 2015.03.16 RFID add
 static struct pinmux_config mc341_i2c1_pin_mux[] = {
