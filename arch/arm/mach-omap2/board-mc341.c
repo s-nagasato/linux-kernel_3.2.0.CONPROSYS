@@ -1809,15 +1809,6 @@ static struct pinmux_config mc341_i2c1_pin_mux[] = {
 	{NULL, 0},
 };
 
-static struct pinmux_config mcs341_i2c1_pin_mux[] = {
-//	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
-	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT},
-//	{"uart0_rtsn.i2c1_scl", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT_PULLUP},
-	{"uart0_rtsn.i2c1_scl", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
-
-	{NULL, 0},
-};
-
 static struct omap_musb_board_data musb_board_data = {
 	.interface_type	= MUSB_INTERFACE_ULPI,
 	/*
@@ -1876,9 +1867,7 @@ static void __init mc341_i2c_init(void)
 				ARRAY_SIZE(mc341_i2c0_boardinfo));
 
 // update 2015.03.16 RFID add
-#ifdef CONFIG_MACH_MC342B00
-	setup_pin_mux(mcs341_i2c1_pin_mux);
-#else
+#ifndef CONFIG_MACH_MC342B00
 	setup_pin_mux(mc341_i2c1_pin_mux);
 #endif
 
@@ -1893,10 +1882,8 @@ if(0){
                        "gpio control: %d\n", __func__, ret);
          }
 }
-#ifndef CONFIG_MACH_MC342B00
 	omap_register_i2c_bus(2, 100, mc341_i2c1_boardinfo,
 				ARRAY_SIZE(mc341_i2c1_boardinfo));
-#endif
 
 	// 2014.12.23
 	#define SPI0_ROM_WPN GPIO_TO_PIN(3, 10)
