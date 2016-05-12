@@ -33,6 +33,7 @@
 // update 2015.03.16 RFID add
 // update 2015.07.03 option enable dcan (disable uart1)
 //                   update Kconfig
+// update 2015.08.20 gpmc add (word access/ byte access) fixed.
 
 
 //#define MC341LAN2 (1)
@@ -94,7 +95,7 @@
 #include <plat/mmc.h>
 #include <plat/emif.h>
 #include <plat/nand.h>
-#include <plat/gpmc.h>		//update 2015.08.04 mcs341 add
+#include <plat/gpmc.h>		//update 2015.08.20 mcs341(gpmc) add
 
 #include "board-flash.h"
 #include "cpuidle33xx.h"
@@ -506,12 +507,16 @@ static struct pinmux_config mcs341_gpmc_pin_mux[] = {
 	{"gpmc_ad14.gpmc_ad14",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_ad15.gpmc_ad15",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_advn_ale.gpmc_advn_ale",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
-	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+///// update 2015.08.20 
+//	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
 	{"gpmc_csn0.gpmc_csn0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 
 
 	{"gpmc_csn1.gpmc_clk", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
-	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
+///// update 2015/08/20
+//	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
+	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
 	{"gpmc_oen_ren.gpmc_oen_ren",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{"gpmc_wen.gpmc_wen",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{NULL, 0},
