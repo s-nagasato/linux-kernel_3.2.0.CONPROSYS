@@ -34,7 +34,9 @@
 // update 2015.07.03 option enable dcan (disable uart1)
 //                   update Kconfig
 // update 2015.08.20 gpmc add (word access/ byte access) fixed.
-
+//	update 2015.09.01 add MC341B-40 
+// update 2015.09.10 gpio1_7 output (with MC341B-40) 
+//	                  spi0_slave_info added (with MC341B-40)
 
 //#define MC341LAN2 (1)
 #define MC341
@@ -255,7 +257,7 @@ static struct omap_board_mux board_mux[] __initdata = {
 	
 //	AM33XX_MUX(XDMA_EVENT_INTR0, OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP), // MC341LAN1
 //	{"xdma_event_intr0.spi1_cs1", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},		/* SPI1_CS1 */ // MC341LAN2
-#ifndef CONFIG_OMAP_MC341B00
+#ifndef CONFIG_MACH_MC341B00
 	AM33XX_MUX(XDMA_EVENT_INTR0, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT), // MC341LAN2
 #endif 
 	AM33XX_MUX(I2C0_SDA, OMAP_MUX_MODE0 | AM33XX_SLEWCTRL_SLOW |
@@ -538,7 +540,8 @@ static struct pinmux_config mc341_gpio_keys_pin_mux[] = {
 	{"gpmc_ad0.gpio1_0", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW2 */
 	{"gpmc_ad1.gpio1_1", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW3 */
 	{"gpmc_ad2.gpio1_2", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW4 */
-	{"gpmc_ad7.gpmc_ad7", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT}, // RS(Half/full) 2015.01.16
+// update 2015.09.10 ( comment out ) 
+//	{"gpmc_ad7.gpmc_ad7", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT}, // RS(Half/full) 2015.01.16
 	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
 	{NULL, 0},
 };
@@ -551,6 +554,13 @@ static struct pinmux_config mc341_gpio_led_mux[] = {
 	{"gpmc_ad4.gpio1_4",    OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, // 3G power
 	{"gpmc_ad5.gpio1_5",    OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT}, // 3G reset
 	{"gpmc_oen_ren.gpio2_3", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* F-LED_PWn */
+#ifdef CONFIG_MACH_MC341B40
+	{"gpmc_ad7.gpio1_7",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+	{"gpmc_ad12.gpio1_12",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+	{"gpmc_ad13.gpio1_13",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+	{"gpmc_ad14.gpio1_14",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+	{"gpmc_ad15.gpio1_15",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+#endif
 	{NULL, 0},
 };
 
@@ -564,7 +574,7 @@ static struct pinmux_config mc341_lan1_model[] = {
 };
 static struct pinmux_config mc341_lan2_model[] = {
 	{"mii1_txd3.gpio0_16", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* GPIO_INIT_END */
-	{"mii1_rxdv.gpio3_4", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* SPI1_UFM-SN */
+	{"mii1_rxdv.gpio3_4", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* SPI1_UFM-SN (MC341B40 named SPI1_POT_CS) */
 
 	{"gpmc_ad3.gpio1_3", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* SHUTDOWN-SWn */
 	{"mii1_txclk.gpio3_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* PW_RST */
@@ -995,6 +1005,24 @@ static struct gpio_led gpio_leds[] = {
 		.name			= "MC341B-00:3G_Reset",
 		.gpio			= GPIO_TO_PIN(1, 5),
 	},
+#ifdef CONFIG_MACH_MC341B40
+	{
+		.name			= "MC341B-40:AI_MP_A0",
+		.gpio			= GPIO_TO_PIN(1, 12),
+	},
+	{
+		.name			= "MC341B-40:AI_MP_A1",
+		.gpio			= GPIO_TO_PIN(1, 13),
+	},
+	{
+		.name			= "MC341B-40:AI_MP_A2",
+		.gpio			= GPIO_TO_PIN(1, 14),
+	},
+	{
+		.name			= "MC341B-40:AO_SW_En",
+		.gpio			= GPIO_TO_PIN(1, 15),
+	},
+#endif
 };
 
 static struct gpio_led_platform_data gpio_led_info = {
@@ -1042,7 +1070,7 @@ static struct spi_board_info mc341_spi0_slave_info[] = {
 		.bus_num       = 1,
 		.chip_select   = 0,
 	},
-	// ad
+// ad
 // update 2015.02.12 max_speed 6Mbps
         {
                 .modalias       = "spidev",
@@ -1071,6 +1099,36 @@ static struct spi_board_info mc341_spi0_slave_info[] = {
                 .mode = SPI_MODE_2,
         },
 };
+
+//update 2015.09.10 
+static struct spi_board_info mc341b40_spi0_slave_info[] = {
+	{
+		.modalias      = "m25p80",
+		// .modalias      = "spidev", // for spidev
+		// .mode=SPI_MODE_3,	// for spidev
+		.platform_data = &mc341_spi_flash,
+		.irq           = -1,
+		.max_speed_hz  = 24000000,
+		.bus_num       = 1,
+		.chip_select   = 0,
+	},
+        { // AI( ADS8326 )
+
+                .modalias       = "spidev",
+                .max_speed_hz   = 5300000, //5.3 Mbps
+                .bus_num        = 2,
+                .chip_select    = 0,
+                .mode = SPI_MODE_0,
+        },
+        { // AO( DAC161S055)
+                .modalias       = "spidev",
+                .max_speed_hz   = 16000000, //16 Mbps
+                .bus_num        = 2,
+                .chip_select    = 1,
+                .mode = SPI_MODE_0,
+        },
+};
+
 /* pinmux for usb0 drvvbus */
 static struct pinmux_config usb0_pin_mux[] = {
 	{"usb0_drvvbus.usb0_drvvbus",    OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},
@@ -1097,8 +1155,14 @@ static void usb1_init(int evm_id, int profile)
 static void spi0_init(int evm_id, int profile)
 {
 	setup_pin_mux(spi0_pin_mux);
+//update 2015.09.10 spi0_slave_info
+#ifdef CONFIG_MACH_MC341B40
+	spi_register_board_info(mc341b40_spi0_slave_info,
+			ARRAY_SIZE(mc341b40_spi0_slave_info));
+#else
 	spi_register_board_info(mc341_spi0_slave_info,
 			ARRAY_SIZE(mc341_spi0_slave_info));
+#endif
 	return;
 }
 // update 2015.02.04 UART3, SPI1 init
@@ -1170,7 +1234,8 @@ static struct evm_dev_cfg evm_sk_dev_cfg[] = {
 // 1129	{lis331dlh_init, DEV_ON_BASEBOARD, PROFILE_ALL},
 // 1129	{mcasp1_init,   DEV_ON_BASEBOARD, PROFILE_ALL},
 // update 2015.07.03
-#ifdef CONFIG_MACH_MC341B30 // add 2015.07.03 .. see Kconfig
+//#ifdef CONFIG_MACH_MC341B30 // add 2015.07.03 .. see Kconfig
+#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) // change 2015.09.01
 	{mc341_dcan_init, DEV_ON_BASEBOARD, PROFILE_ALL},
 #else
 	{uart1_wl12xx_init, DEV_ON_BASEBOARD, PROFILE_ALL}, // add 2014.12.01
@@ -2022,7 +2087,7 @@ static void __init mc341_map_io(void)
 	omapam33xx_map_common_io();
 }
 
-// CPS-MC341-ADSC1
+// CPS-MC341-ADSCn
 MACHINE_START(MC341B10, "mc341b10")
 	// Maintainer: CONTEC Co.,Ltd.
 	.atag_offset	= 0x100,
@@ -2033,8 +2098,19 @@ MACHINE_START(MC341B10, "mc341b10")
 	.timer		= &omap3_am33xx_timer,
 	.init_machine	= mc341_init,
 MACHINE_END
-//CPS-MC341-DS1
+//CPS-MC341-DSn
 MACHINE_START(MC341B30, "mc341b30")
+	// Maintainer: CONTEC Co.,Ltd.
+	.atag_offset	= 0x100,
+	.map_io		= mc341_map_io,
+	.init_early	= am33xx_init_early,
+	.init_irq	= ti81xx_init_irq,
+	.handle_irq	= omap3_intc_handle_irq,
+	.timer		= &omap3_am33xx_timer,
+	.init_machine	= mc341_init,
+MACHINE_END
+//CPS-MC341-An
+MACHINE_START(MC341B40, "mc341b40")
 	// Maintainer: CONTEC Co.,Ltd.
 	.atag_offset	= 0x100,
 	.map_io		= mc341_map_io,
@@ -2065,6 +2141,7 @@ MACHINE_START(AM335XEVM, "am335xevm")
 	.timer		= &omap3_am33xx_timer,
 	.init_machine	= mc341_init,
 MACHINE_END
+
 /*
 MACHINE_START(AM335XIAEVM, "am335xiaevm")
 	// Maintainer: Texas Instruments
