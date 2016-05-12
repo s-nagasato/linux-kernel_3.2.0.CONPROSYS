@@ -1,7 +1,7 @@
 /*
- * Code for MC341.
+ * Code for CONPROSYS Series.by the CONTEC.
  *
- * Copyright (C) 2015 CONTEC/CO/Ltd. - http://www.contec.co.jp/
+ * Copyright (C) 2015 CONTEC.Co.,Ltd. - http://www.contec.co.jp/
  * Based by board-am34xevm.c. 
  *
  * This program is free software; you can redistribute it and/or
@@ -39,7 +39,12 @@
 // update 2015.09.10 gpio1_7 output (with MC341B-40) 
 //	                  spi0_slave_info added (with MC341B-40)
 // update 2015.10.01 spi1 digital potentiometer (with MC341B-40)
-
+// update 2015.11.05 Add EEPROM Modules for I2C0 and I2C1
+//                   Add PowerMonitor for CPS-MCS341-DSx
+// update 2016.01.29 Add i2c0 (CAN Board EEPROM ) for CPS-MC341-DSx and CPS-MC341-Ax
+// update 2016.03.16 Add I2C EEPROM plathome data
+//                   Add CPS-MC341-DS5(?) (tested.)
+ 
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
@@ -1664,6 +1669,15 @@ static struct at24_platform_data mc341_baseboard_eeprom_info = {
 	.context        = (void *)NULL,
 };
 
+// I2C-2 BUS 2Kbit(256x8bit) EEPROM - BR24L02F-W 
+	// update 2016.03.16
+static struct at24_platform_data mc341_childboard_eeprom_info = {
+	.byte_len       = (256*8) / 8,
+	.page_size      = 8,
+	.flags          = 0,
+	.context        = (void *)NULL,
+};
+
 /*
 */
 static struct regulator_init_data am335x_dummy = {
@@ -1772,10 +1786,22 @@ static struct i2c_board_info __initdata mc341_i2c0_boardinfo[] = {
 		I2C_BOARD_INFO("rx8900", 0x32), // RTC
 	},
 // update 2015.11.05 Add Power Monitor (CPS-MCS341-DSX)
+#ifdef CONFIG_MACH_MC342B00
 	{
 //		I2C_BOARD_INFO("rtc-mcp7940", 0x6f), // RTC
 		I2C_BOARD_INFO("ina226", 0x40), // RTC
 	},
+#endif
+// update 2016.01.29 Add CAN Board EEPROM <ID's> 
+// (CPS-MC341-DS2 or CPS-MC341-DS4, CPS-MC341-A2 or CPS-MC341-DS4 )
+//#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) // change 2016.03.16 ( CPS-MC341-DS5 ? )
+#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) || defined(CONFIG_MACH_MC341B50) // change 2016.03.16 ( CPS-MC341-DS5 ? )
+	{
+		I2C_BOARD_INFO("INF-MC341-30(CAN)", 0x52),
+		.platform_data  = &mc341_childboard_eeprom_info,	// update 2016.03.16
+	},
+#endif
+// End of update 2016.01.29
 };
 
 // update 2015.03.16 RFID add
@@ -1785,12 +1811,15 @@ static struct i2c_board_info __initdata mc341_i2c1_boardinfo[] = {
 // update 2015.11.05 I2C Update
 	{
 		I2C_BOARD_INFO("INF-MC341-10(RS485)", 0x50),
+		.platform_data  = &mc341_childboard_eeprom_info,	// update 2016.03.16
 	},
 	{
 		I2C_BOARD_INFO("JIG-MC341-00(3G)", 0x51),
+		.platform_data  = &mc341_childboard_eeprom_info,	// update 2016.03.16
 	},
 	{
 		I2C_BOARD_INFO("JIG-MC341-00(NFC)", 0x52),
+		.platform_data  = &mc341_childboard_eeprom_info,	// update 2016.03.16
 	},
 	{
 // update 2015.11.05 End	
@@ -2147,6 +2176,17 @@ MACHINE_END
 //CPS-MC342
 MACHINE_START(MC342B00, "mc342b00")
 	//Maintainer: CONTEC Co.,Ltd.
+	.atag_offset	= 0x100,
+	.map_io		= mc341_map_io,
+	.init_early	= am33xx_init_early,
+	.init_irq	= ti81xx_init_irq,
+	.handle_irq	= omap3_intc_handle_irq,
+	.timer		= &omap3_am33xx_timer,
+	.init_machine	= mc341_init,
+MACHINE_END
+//CPS-MC341-DS5 
+MACHINE_START(MC341B50, "mc341b50")
+	// Maintainer: CONTEC Co.,Ltd.
 	.atag_offset	= 0x100,
 	.map_io		= mc341_map_io,
 	.init_early	= am33xx_init_early,

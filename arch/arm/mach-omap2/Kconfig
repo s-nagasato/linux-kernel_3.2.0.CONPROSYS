@@ -364,56 +364,65 @@ config MACH_MC341B00
 	depends on SOC_OMAPAM33XX
 
 config MACH_MC341B10
-	bool "CPS-MC341-ADSC1"
+	bool "CPS-MC341-ADSCx"
 	depends on SOC_OMAPAM33XX 
 	help
 	CONTEC CONPROSYS CPS-MC341-ADSC1 Modules.
 
 config MACH_MC341B30
-	bool "CPS-MC341-DS1"
+	bool "CPS-MC341-DSx"
 	depends on SOC_OMAPAM33XX 
 	help
 	CONTEC CONPROSYS CPS-MC341-DS1 Modules.
 
 config MACH_MC341B40
-	bool "CPS-MC341-A1"
+	bool "CPS-MC341-Ax"
 	depends on SOC_OMAPAM33XX 
 	help
 	CONTEC CONPROSYS CPS-MC341-A1 Modules.
 
 config MACH_MC342B00
-	bool "CPS-MCS341"
+	bool "CPS-MCS341-DSx"
 	depends on SOC_OMAPAM33XX
 	help
-	CONTEC CONPROSYS CPS-MCS-341 Modules.
+	CONTEC CONPROSYS CPS-MCS341-DSx Modules.
+
+config MACH_MC341B50
+	bool "CPS-MC341-DS5"
+	depends on SOC_OMAPAM33XX
+	help
+	CONTEC CONPROSYS CPS-MC341-DS5 Modules.
 
 endchoice
 
 config MACH_MC341_ENABLE_RTC_CLOCK
 	bool "Enable RTC Clock"
-	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00
+	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00 || MACH_MC341B50
 	default n
 	help
 	Enable RTC Clock.( Default disable. )
 
 config MACH_MC34X_ENABLE_NMI_INTERRUPT
 	bool "Enable Nmi Interrrupt"
-	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00
+	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00 || MACH_MC341B50
 	default y
 	help
 	Enable NMI Interrupt pin.
 
-comment "Check LAN TYPE : 2LAN TYPE "
+#check comments
+
+comment "Check LAN TYPE : 2LAN TYPE"
 	depends on ( TI_CPSW_DUAL_EMAC && VLAN_8021Q )
 
-comment "Check MAC TYPE :Daisy Chain TYPE "
-	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q=n )
-
-comment "Check MAC TYPE : ERROR <DUAL EMAC Enable, VLAN Disable>"
+comment "Check LAN TYPE : Unknown TYPE <DUAL EMAC Enable, VLAN Disable>"
 	depends on (TI_CPSW_DUAL_EMAC && VLAN_8021Q=n )
 
-comment "Check MAC TYPE : ERROR <DUAL EMAC Disable, VLAN Enable>"
+comment "Check LAN TYPE : NO-VLAN TYPE (Daisy Chain)"
+	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q=n )
+
+comment "Check LAN TYPE : 1LAN TYPE (Daisy Chain)"
 	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q )
+
 
 endif # CONTEC_MC34X
 

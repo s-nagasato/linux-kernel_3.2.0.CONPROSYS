@@ -159,7 +159,9 @@ static void serial_omap_stop_tx(struct uart_port *port)
 	pm_runtime_put_autosuspend(&up->pdev->dev);
 
 	if( up->pdev->id == 1 ||
-	    up->pdev->id == 3 ){
+	    up->pdev->id == 3 ||
+	    up->pdev->id == 5
+		){
 		if( TIOCSRS485_mode[up->pdev->id] ){
 			// #define UART_LSR_TEMT		0x40 // Transmitter empty
 			unsigned long flags = 0;
@@ -294,7 +296,9 @@ static void transmit_chars(struct uart_omap_port *up)
 	int count;
 
 	if( up->pdev->id == 1 ||
-	    up->pdev->id == 3 ){
+	    up->pdev->id == 3 ||
+	    up->pdev->id == 5
+	){
 	 if( TIOCSRS485_mode[up->pdev->id] ){
 		unsigned int mctrl;
 		mctrl=serial_omap_get_mctrl( &up->port );
@@ -1248,7 +1252,9 @@ serial_omap_ioctl(struct uart_port *port, unsigned int cmd, unsigned long arg)
 		//  	"[%s](%d) debug in TIOCSRS485 port[%d], set arg[%d]", __FILE__, __LINE__, 
 		//  		up->pdev->id, arg );
 		if( up->pdev->id == 1 ||
-		    up->pdev->id == 3 ){
+		    up->pdev->id == 3 ||
+		    up->pdev->id == 5
+		){
 			unsigned int mctrl;
 			TIOCSRS485_mode[up->pdev->id]=arg;
 			mctrl=serial_omap_get_mctrl( port );
