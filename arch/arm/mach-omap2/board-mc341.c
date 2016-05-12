@@ -1432,6 +1432,7 @@ static void setup_starterkit(void)
 		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG2);
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG2 is [%x]", regval  );
 		regval=0x00071E01;
+		//regval=0x001F1E01;		//Debug 2015/12/9
 		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG2, regval);
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG2 set[%x]", regval  );
 		// GPMC_CONFIG3_0:0x00020201
@@ -1442,14 +1443,16 @@ static void setup_starterkit(void)
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG3 set[%x]", regval  );
 		// GPMC_CONFIG4_0:0x06041E04
 		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG4);
-		if(show_msg)printk(KERN_INFO "GPMC_CONFIG4 is [%x]", regval  );
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG4 is [%x]", regval  );		
 		regval=0x06041E04;
+		//regval=0x1E041E04; //Debug 2015/12/9
 		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG4, regval);
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG4 set[%x]", regval  );
 		// GPMC_CONFIG5_0:0x041D081F
 		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG5);
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG5 is [%x]", regval  );
 		regval=0x041D081F;
+		//regval=0x041D1F1F;	//Debug 2015/12/9
 		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG5, regval);
 		if(show_msg)printk(KERN_INFO "GPMC_CONFIG5 set[%x]", regval  );
 		// GPMC_CONFIG6_0:0x07040001

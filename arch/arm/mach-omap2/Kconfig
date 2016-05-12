@@ -403,11 +403,17 @@ config MACH_MC34X_ENABLE_NMI_INTERRUPT
 	help
 	Enable NMI Interrupt pin.
 
-comment "Check MAC TYPE : Dual MAC"
-	depends on TI_CPSW_DUAL_EMAC
+comment "Check LAN TYPE : 2LAN TYPE "
+	depends on ( TI_CPSW_DUAL_EMAC && VLAN_8021Q )
 
-comment "Check MAC TYPE : Single MAC (Bridge)"
-	depends on !TI_CPSW_DUAL_EMAC
+comment "Check MAC TYPE :Daisy Chain TYPE "
+	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q=n )
+
+comment "Check MAC TYPE : ERROR <DUAL EMAC Enable, VLAN Disable>"
+	depends on (TI_CPSW_DUAL_EMAC && VLAN_8021Q=n )
+
+comment "Check MAC TYPE : ERROR <DUAL EMAC Disable, VLAN Enable>"
+	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q )
 
 endif # CONTEC_MC34X
 

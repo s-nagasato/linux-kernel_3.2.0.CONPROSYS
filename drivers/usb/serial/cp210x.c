@@ -12,6 +12,8 @@
  * control thanks to Munir Nassar nassarmu@real-time.com
  *
  */
+//update 2016.01.07 DELTA OHM HD35AP Add
+
 
 #include <linux/kernel.h>
 #include <linux/errno.h>
@@ -27,7 +29,7 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "v0.09"
+#define DRIVER_VERSION "v0.09.1"
 #define DRIVER_DESC "Silicon Labs CP210x RS232 serial adaptor driver"
 
 /*
@@ -119,6 +121,9 @@ static const struct usb_device_id id_table[] = {
 	{ USB_DEVICE(0x10C4, 0xEA60) }, /* Silicon Labs factory default */
 	{ USB_DEVICE(0x10C4, 0xEA61) }, /* Silicon Labs factory default */
 	{ USB_DEVICE(0x10C4, 0xEA71) }, /* Infinity GPS-MIC-1 Radio Monophone */
+// update 2016.01.07
+	{ USB_DEVICE(0x10C4, 0xEA80) }, /* DELTA OHM HD35AP */
+// update end 2016.01.07
 	{ USB_DEVICE(0x10C4, 0xF001) }, /* Elan Digital Systems USBscope50 */
 	{ USB_DEVICE(0x10C4, 0xF002) }, /* Elan Digital Systems USBwave12 */
 	{ USB_DEVICE(0x10C4, 0xF003) }, /* Elan Digital Systems USBpulse100 */
