@@ -94,6 +94,7 @@
 #include <plat/mmc.h>
 #include <plat/emif.h>
 #include <plat/nand.h>
+#include <plat/gpmc.h>		//update 2015.08.04 mcs341 add
 
 #include "board-flash.h"
 #include "cpuidle33xx.h"
@@ -486,8 +487,49 @@ static struct pinmux_config mmc0_cd_only_pin_mux[] = {
 	{"spi0_cs1.mmc0_sdcd",  OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
 	{NULL, 0},
 };
-// pinmux for gpio based key
-static struct pinmux_config gpio_keys_pin_mux[] = {
+
+static struct pinmux_config mcs341_gpmc_pin_mux[] = {
+	{"gpmc_ad0.gpmc_ad0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad1.gpmc_ad1",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad2.gpmc_ad2",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad3.gpmc_ad3",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad4.gpmc_ad4",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad5.gpmc_ad5",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad6.gpmc_ad6",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad7.gpmc_ad7",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad8.gpmc_ad8",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad9.gpmc_ad9",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad10.gpmc_ad10",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad11.gpmc_ad11",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad12.gpmc_ad12",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad13.gpmc_ad13",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad14.gpmc_ad14",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ad15.gpmc_ad15",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_advn_ale.gpmc_advn_ale",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_csn0.gpmc_csn0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
+
+
+	{"gpmc_csn1.gpmc_clk", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
+	{"gpmc_oen_ren.gpmc_oen_ren",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
+	{"gpmc_wen.gpmc_wen",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
+	{NULL, 0},
+};
+
+// pinmux for gpio based key( MCS341 )
+static struct pinmux_config mcs341_gpio_keys_pin_mux[] = {
+	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
+	{NULL, 0},
+};
+// pinmux for led device( MCS341 )
+static struct pinmux_config mcs341_gpio_led_mux[] = {
+	{"gpmc_oen_ren.gpio2_3", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* F-LED_PWn */
+	{NULL, 0},
+};
+
+// pinmux for gpio based key( MC341 )
+static struct pinmux_config mc341_gpio_keys_pin_mux[] = {
 	{"gpmc_ad0.gpio1_0", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW2 */
 	{"gpmc_ad1.gpio1_1", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW3 */
 	{"gpmc_ad2.gpio1_2", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW4 */
@@ -495,8 +537,9 @@ static struct pinmux_config gpio_keys_pin_mux[] = {
 	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
 	{NULL, 0},
 };
-// pinmux for led device
-static struct pinmux_config gpio_led_mux[] = {
+
+// pinmux for led device( MC341 )
+static struct pinmux_config mc341_gpio_led_mux[] = {
 	{"gpmc_ad10.gpio0_26", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* LED_ST0n */
 	{"gpmc_ad11.gpio0_27", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* LED_ST1n */
         // update 2015.03.02 3G power
@@ -527,6 +570,17 @@ static struct pinmux_config mc341_lan2_model[] = {
 	{NULL, 0},
 };
 
+static struct pinmux_config mcs341_lan2_model[] = {
+	{"mii1_txd3.gpio0_16", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* GPIO_INIT_END */
+	{"mii1_rxdv.gpio3_4", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* SPI1_UFM-SN */
+
+	{"mii1_txclk.gpio3_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* PW_RST */
+	{"mcasp0_fsr.gpio3_19", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN_SPEED_LED-A */
+	{"mcasp0_axr1.gpio3_20", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN_SPEED_LED-B */
+	{"mcasp0_aclkr.gpio3_18", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},		/* LAN-A_INTn */
+	{"mcasp0_ahclkx.gpio3_21", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},		/* LAN-B_INTn */
+	{NULL, 0},
+};
 
 /*
 * @pin_mux - single module pin-mux structure which defines pin-mux
@@ -601,8 +655,15 @@ struct wl12xx_platform_data am335xevm_wlan_data = {
 	.wlan_enable_gpio = GPIO_TO_PIN(1, 16),
 };
 
+static struct pinmux_config mcs341_uart1_wl12xx_pin_mux[] = {
+	{"uart1_rxd.uart1_rxd", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT_PULLUP},		/* UART1_RXD RS485 */
+	{"uart1_txd.uart1_txd", OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},			/* UART1_TXD RS485 */
+	{"uart1_rtsn.uart1_rtsn", OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},	/* UART1_RTSn RS485 */
+	{"uart1_ctsn.uart1_ctsn", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT_PULLUP},			/* UART1_CTSn RS485 */
+	{NULL, 0},
+};
 
-static struct pinmux_config uart1_wl12xx_pin_mux[] = {
+static struct pinmux_config mc341_uart1_wl12xx_pin_mux[] = {
 	{"uart1_rxd.uart1_rxd", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT_PULLUP},		/* UART1_RXD RS485 */
 	{"uart1_txd.uart1_txd", OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT},			/* UART1_TXD RS485 */
 //	{"uart1_rtsn.uart1_rtsn", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT_PULLUP},	/* UART1_RTSn RS485 */
@@ -728,7 +789,11 @@ static const struct flash_platform_data mc341_spi_flash = {
 
 static void uart1_wl12xx_init(int evm_id, int profile)
 {
-	setup_pin_mux(uart1_wl12xx_pin_mux);
+#ifdef CONFIG_MACH_MC342B00
+	setup_pin_mux(mcs341_uart1_wl12xx_pin_mux);
+#else
+	setup_pin_mux(mc341_uart1_wl12xx_pin_mux);
+#endif
 }
 
 // update 2015.07.03
@@ -888,7 +953,11 @@ static void gpio_keys_init(int evm_id, int profile)
 {
 	int err;
 
-	setup_pin_mux(gpio_keys_pin_mux);
+#ifdef CONFIG_MACH_MC342B00
+	setup_pin_mux(mcs341_gpio_keys_pin_mux);
+#else
+	setup_pin_mux(mc341_gpio_keys_pin_mux);
+#endif
 	err = platform_device_register(&mc341_gpio_keys);
 	if (err)
 		pr_err("failed to register gpio key device\n");
@@ -938,8 +1007,11 @@ static struct platform_device leds_gpio = {
 static void gpio_led_init(int evm_id, int profile)
 {
 	int err;
-
-	setup_pin_mux(gpio_led_mux);
+#ifdef CONFIG_MACH_MC342B00
+	setup_pin_mux(mcs341_gpio_led_mux);
+#else
+	setup_pin_mux(mc341_gpio_led_mux);
+#endif
 	err = platform_device_register(&leds_gpio);
 	if (err)
 		pr_err("failed to register gpio led device\n");
@@ -1234,7 +1306,11 @@ static void setup_starterkit(void)
 	{
 		int ret;
 		setup_pin_mux(rmii2_pin_mux);
+#ifdef CONFIG_MACH_MC342B00
+		setup_pin_mux(mcs341_lan2_model);
+#else
 		setup_pin_mux(mc341_lan2_model);
+#endif
 		// 2015.02.09
 			#define GPIO_INIT_END GPIO_TO_PIN(0, 16)
 			ret = gpio_request(GPIO_INIT_END, "GPIO_INIT_END");
@@ -1247,6 +1323,64 @@ static void setup_starterkit(void)
 	}
 #endif
 
+#ifdef CONFIG_MACH_MC342B00
+	// GPMC
+	setup_pin_mux(mcs341_gpmc_pin_mux);
+	{
+		u32 regval;
+		int show_msg=1;
+		int cs=0;
+		struct gpmc_devices_info gpmc_device[2] = {
+				{ NULL, 0 },
+				{ NULL, 0 },
+		};
+
+		omap_init_gpmc(gpmc_device, sizeof(gpmc_device));
+
+		// GPMC_CONFIG1_0:0x28001211
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG1);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG1 is [%x]", regval  );
+		regval=0x28001211;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG1, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG1 set[%x]", regval  );
+		// GPMC_CONFIG2_0:0x00071E01
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG2);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG2 is [%x]", regval  );
+		regval=0x00071E01;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG2, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG2 set[%x]", regval  );
+		// GPMC_CONFIG3_0:0x00020201
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG3);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG3 is [%x]", regval  );
+		regval=0x00020201;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG3, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG3 set[%x]", regval  );
+		// GPMC_CONFIG4_0:0x06041E04
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG4);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG4 is [%x]", regval  );
+		regval=0x06041E04;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG4, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG4 set[%x]", regval  );
+		// GPMC_CONFIG5_0:0x041D081F
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG5);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG5 is [%x]", regval  );
+		regval=0x041D081F;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG5, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG5 set[%x]", regval  );
+		// GPMC_CONFIG6_0:0x07040001
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG6);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG6 is [%x]", regval  );
+		regval=0x07040001;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG6, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG6 set[%x]", regval  );
+		// GPMC_CONFIG7_0:0x00000F48
+		regval = gpmc_cs_read_reg(cs, GPMC_CS_CONFIG7);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG7 is [%x]", regval  );
+		regval=0x00000F48;
+		gpmc_cs_write_reg(cs, GPMC_CS_CONFIG7, regval);
+		if(show_msg)printk(KERN_INFO "GPMC_CONFIG7 set[%x]", regval  );
+	}
+#endif
 }
 
 
@@ -1560,7 +1694,7 @@ static struct i2c_board_info __initdata mc341_i2c1_boardinfo[] = {
 	},
 };
 // update 2015.03.16 RFID add
-static struct pinmux_config i2c1_pin_mux[] = {
+static struct pinmux_config mc341_i2c1_pin_mux[] = {
 //	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
 ////	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT},
 //	{"uart0_rtsn.i2c1_scl", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT_PULLUP},
@@ -1570,6 +1704,16 @@ static struct pinmux_config i2c1_pin_mux[] = {
 	{"gpmc_ad9.gpio0_23", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT },
 	{NULL, 0},
 };
+
+static struct pinmux_config mcs341_i2c1_pin_mux[] = {
+//	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
+	{"uart0_ctsn.i2c1_sda", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT},
+//	{"uart0_rtsn.i2c1_scl", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT_PULLUP},
+	{"uart0_rtsn.i2c1_scl", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},
+
+	{NULL, 0},
+};
+
 static struct omap_musb_board_data musb_board_data = {
 	.interface_type	= MUSB_INTERFACE_ULPI,
 	/*
@@ -1628,7 +1772,12 @@ static void __init mc341_i2c_init(void)
 				ARRAY_SIZE(mc341_i2c0_boardinfo));
 
 // update 2015.03.16 RFID add
-	setup_pin_mux(i2c1_pin_mux);
+#ifdef CONFIG_MACH_MC342B00
+	setup_pin_mux(mcs341_i2c1_pin_mux);
+#else
+	setup_pin_mux(mc341_i2c1_pin_mux);
+#endif
+
 if(0){
          #define GPIO_INIT_I2C1 GPIO_TO_PIN(0, 23)
          ret = gpio_request(GPIO_INIT_I2C1, "GPIO_INIT_I2C1");
@@ -1640,10 +1789,10 @@ if(0){
                        "gpio control: %d\n", __func__, ret);
          }
 }
-if(1){
+#ifndef CONFIG_MACH_MC342B00
 	omap_register_i2c_bus(2, 100, mc341_i2c1_boardinfo,
 				ARRAY_SIZE(mc341_i2c1_boardinfo));
-}
+#endif
 
 	// 2014.12.23
 	#define SPI0_ROM_WPN GPIO_TO_PIN(3, 10)

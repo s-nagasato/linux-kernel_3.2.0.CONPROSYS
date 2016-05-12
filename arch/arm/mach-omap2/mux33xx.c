@@ -17,7 +17,7 @@
 // update 2015.02.26 uart5 update
 // update 2015.03.10 nmi update
 // update 2015.07.03 dcan0/dcan1 update
-
+// update 2015.08.04 gpmc
 #include <linux/module.h>
 #include <linux/init.h>
 
@@ -131,10 +131,14 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		"gpmc_csn0", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio1_29"),
 	_AM33XX_MUXENTRY(GPMC_CSN1, 0,
-		"gpmc_csn1", NULL, "mmc1_clk", NULL,
+// update 2015.08.04 gpmc 
+//		"gpmc_csn1", NULL, "mmc1_clk", NULL,
+		"gpmc_csn1", "gpmc_clk", "mmc1_clk", NULL,
 		NULL, NULL, NULL, "gpio1_30"),
 	_AM33XX_MUXENTRY(GPMC_CSN2, 0,
-		"gpmc_csn2", NULL, "mmc1_cmd", NULL,
+// update 2015.08.04 gpmc 
+//		"gpmc_csn2", NULL, "mmc1_cmd", NULL,
+		"gpmc_csn2", "gpmc_be1n", "mmc1_cmd", NULL,
 		NULL, NULL, NULL, "gpio1_31"),
 	_AM33XX_MUXENTRY(GPMC_CSN3, 0,
 		"gpmc_csn3", NULL, NULL, "mmc2_cmd",

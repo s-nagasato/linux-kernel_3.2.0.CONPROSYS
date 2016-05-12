@@ -385,14 +385,14 @@ endchoice
 
 config MACH_MC341_ENABLE_RTC_CLOCK
 	bool "Enable RTC Clock"
-	depends on MACH_MC341B10 || MACH_MC341B30
+	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC342B00
 	default n
 	help
 	Enable RTC Clock.( Default disable. )
 
 config MACH_MC34X_ENABLE_NMI_INTERRUPT
 	bool "Enable Nmi Interrrupt"
-	depends on MACH_MC341B10 || MACH_MC341B30
+	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC342B00
 	default y
 	help
 	Enable NMI Interrupt pin.
