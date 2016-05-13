@@ -18,6 +18,7 @@
 // update 2015.03.10 nmi update
 // update 2015.07.03 dcan0/dcan1 update
 // update 2015.08.04 gpmc
+// update 2016.04.11 ec series add pin update 
 #include <linux/module.h>
 #include <linux/init.h>
 
@@ -84,49 +85,64 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		NULL, NULL, NULL, "gpio1_15"),
 	_AM33XX_MUXENTRY(GPMC_A0, 0,
 		"gpmc_a0", "mii2_txen", "rgmii2_tctl", "rmii2_txen",
-		NULL, NULL, NULL, "gpio1_16"),
+//		NULL, NULL, NULL, "gpio1_16"),	
+		NULL, "pr1_mii1_mt1_clk", NULL, "gpio1_16"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A1, 0,
 		"gpmc_a1", "mii2_rxdv", "rgmii2_rctl", "mmc2_dat0",
-		NULL, NULL, NULL, "gpio1_17"),
+//		NULL, NULL, NULL, "gpio1_17"),
+		NULL, "pr1_mii1_txd3", NULL, "gpio1_17"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A2, 0,
 		"gpmc_a2", "mii2_txd3", "rgmii2_td3", "mmc2_dat1",
-		NULL, NULL, NULL, "gpio1_18"),
+//		NULL, NULL, NULL, "gpio1_18"),
+		NULL, "pr1_mii1_txd2", NULL, "gpio1_18"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A3, 0,
 		"gpmc_a3", "mii2_txd2", "rgmii2_td2", "mmc2_dat2",
-		NULL, NULL, NULL, "gpio1_19"),
+//		NULL, NULL, NULL, "gpio1_19"),
+		NULL, "pr1_mii1_txd1", NULL, "gpio1_19"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A4, 0,
 		"gpmc_a4", "mii2_txd1", "rgmii2_td1", "rmii2_txd1",
-		"gpmc_a20", NULL, NULL, "gpio1_20"),
+//		"gpmc_a20", NULL, NULL, "gpio1_20"),
+		"gpmc_a20", "pr1_mii1_txd0", NULL, "gpio1_20"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A5, 0,
 		"gpmc_a5", "mii2_txd0", "rgmii2_td0", "rmii2_txd0",
-		"gpmc_a21", NULL, NULL, "gpio1_21"),
+//		"gpmc_a21", NULL, NULL, "gpio1_21"),
+		"gpmc_a21", "pr1_mii1_rxd3", NULL, "gpio1_21"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A6, 0,
 		"gpmc_a6", "mii2_txclk", "rgmii2_tclk", "mmc2_dat4",
-		"gpmc_a22", NULL, NULL, "gpio1_22"),
+//		"gpmc_a22", NULL, NULL, "gpio1_22"),
+		"gpmc_a22", "pr1_mii1_rxd2", NULL, "gpio1_22"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A7, 0,
 		"gpmc_a7", "mii2_rxclk", "rgmii2_rclk", "mmc2_dat5",
-		NULL, NULL, NULL, "gpio1_23"),
+//		NULL, NULL, NULL, "gpio1_23"),
+		NULL, "pr1_mii1_rxd1", NULL, "gpio1_23"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A8, 0,
 		"gpmc_a8", "mii2_rxd3", "rgmii2_rd3", "mmc2_dat6",
-		NULL, NULL, "mcasp0_aclkx", "gpio1_24"),
+//		NULL, NULL, "mcasp0_aclkx", "gpio1_24"),
+		NULL, "pr1_mii1_rxd0", "mcasp0_aclkx", "gpio1_24"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A9, 0,
 		"gpmc_a9", "mii2_rxd2", "rgmii2_rd2", "mmc2_dat7",
-		NULL, NULL, "mcasp0_fsx", "gpio1_25"),
+//		NULL, NULL, "mcasp0_fsx", "gpio1_25"),
+		NULL, "pr1_mii1_mr1_clk", "mcasp0_fsx", "gpio1_25"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A10, 0,
 		"gpmc_a10", "mii2_rxd1", "rgmii2_rd1", "rmii2_rxd1",
-		NULL, NULL, "mcasp0_axr0", "gpio1_26"),
+//		NULL, NULL, "mcasp0_axr0", "gpio1_26"),
+		NULL, "pr1_mii1_rxdv", "mcasp0_axr0", "gpio1_26"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_A11, 0,
 		"gpmc_a11", "mii2_rxd0", "rgmii2_rd0", "rmii2_rxd0",
-		NULL, NULL, "mcasp0_axr1", "gpio1_27"),
+//		NULL, NULL, "mcasp0_axr1", "gpio1_27"),
+		NULL, "pr1_mii1_rxerr", "mcasp0_axr1", "gpio1_27"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_WAIT0, 0,
-		"gpmc_wait0", "mii2_crs", NULL, "rmii2_crs_dv",
+//		"gpmc_wait0", "mii2_crs", NULL, "rmii2_crs_dv",
+		"gpmc_wait0", "mii2_crs", "gpmc_csn4", "rmii2_crs_dv",	// update 2016.04.11
 		"mmc1_sdcd", NULL, NULL, "gpio0_30"),
 	_AM33XX_MUXENTRY(GPMC_WPN, 0,
 		"gpmc_wpn", "mii2_rxerr", NULL, "rmii2_rxerr",
-		"mmc2_sdcd", NULL, NULL, "gpio0_31"),
+//		"mmc2_sdcd", NULL, NULL, "gpio0_31"),
+		"mmc2_sdcd", "pr1_mii1_txen", NULL, "gpio0_31"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_BEN1, 0,
 		"gpmc_ben1", "mii2_col", NULL, "mmc2_dat3",
-		NULL, NULL, "mcasp0_aclkr", "gpio1_28"),
+//		NULL, NULL, "mcasp0_aclkr", "gpio1_28"),
+		NULL, "pr1_mii1_rxlink", "mcasp0_aclkr", "gpio1_28"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_CSN0, 0,
 		"gpmc_csn0", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio1_29"),
@@ -142,10 +158,12 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		NULL, NULL, NULL, "gpio1_31"),
 	_AM33XX_MUXENTRY(GPMC_CSN3, 0,
 		"gpmc_csn3", NULL, NULL, "mmc2_cmd",
-		NULL, NULL, NULL, "gpio2_0"),
+//		NULL, NULL, NULL, "gpio2_0"),
+		NULL, "pr1_mdio_data", NULL, "gpio2_0"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_CLK, 0,
 		"gpmc_clk", "lcd_memory_clk_mux", NULL, "mmc2_clk",
-		NULL, NULL, "mcasp0_fsr", "gpio2_1"),
+//		NULL, NULL, "mcasp0_fsr", "gpio2_1"),
+		NULL, "pr1_mdio_mdclk", "mcasp0_fsr", "gpio2_1"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(GPMC_ADVN_ALE, 0,
 		"gpmc_advn_ale", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio2_2"),
@@ -159,22 +177,28 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		"gpmc_ben0_cle", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio2_5"),
 	_AM33XX_MUXENTRY(LCD_DATA0, 0,
-		"lcd_data0", "gpmc_a0", NULL, NULL,
+//		"lcd_data0", "gpmc_a0", NULL, NULL,
+		"lcd_data0", "gpmc_a0", "pr1_mii_mt0_clk", NULL,	// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_6"),
 	_AM33XX_MUXENTRY(LCD_DATA1, 0,
-		"lcd_data1", "gpmc_a1", NULL, NULL,
+//		"lcd_data1", "gpmc_a1", NULL, NULL,
+		"lcd_data1", "gpmc_a1", "pr1_mii0_txen", NULL,		// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_7"),
 	_AM33XX_MUXENTRY(LCD_DATA2, 0,
-		"lcd_data2", "gpmc_a2", NULL, NULL,
+//		"lcd_data2", "gpmc_a2", NULL, NULL,
+		"lcd_data2", "gpmc_a2", "pr1_mii0_txd3", NULL,		// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_8"),
 	_AM33XX_MUXENTRY(LCD_DATA3, 0,
-		"lcd_data3", "gpmc_a3", NULL, NULL,
+//		"lcd_data3", "gpmc_a3", NULL, NULL,
+		"lcd_data3", "gpmc_a3", "pr1_mii0_txd2", NULL,		// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_9"),
 	_AM33XX_MUXENTRY(LCD_DATA4, 0,
-		"lcd_data4", "gpmc_a4", NULL, NULL,
+//		"lcd_data4", "gpmc_a4", NULL, NULL,
+		"lcd_data4", "gpmc_a4", "pr1_mii0_txd1", NULL,		// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_10"),
 	_AM33XX_MUXENTRY(LCD_DATA5, 0,
-		"lcd_data5", "gpmc_a5", NULL, NULL,
+//		"lcd_data5", "gpmc_a5", NULL, NULL,
+		"lcd_data5", "gpmc_a5", "pr1_mii0_txd0", NULL,		// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_11"),
 	_AM33XX_MUXENTRY(LCD_DATA6, 0,
 		"lcd_data6", "gpmc_a6", NULL, NULL,
@@ -191,10 +215,12 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 //		NULL, NULL, "uart2_rtsn", "gpio2_15"),
 	_AM33XX_MUXENTRY(LCD_DATA8, 0,
 		"lcd_data8", "gpmc_a12", NULL, "mcasp0_aclkx",
-		"uart5_txd", NULL, "uart2_ctsn", "gpio2_14"),
+//		"uart5_txd", NULL, "uart2_ctsn", "gpio2_14"),
+		"uart5_txd", "pr1_mii0_txd3", "uart2_ctsn", "gpio2_14"),	// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_DATA9, 0,
 		"lcd_data9", "gpmc_a13", NULL, "mcasp0_fsx",
-		"uart5_rxd", NULL, "uart2_rtsn", "gpio2_15"),
+//		"uart5_rxd", NULL, "uart2_rtsn", "gpio2_15"),
+		"uart5_rxd", "pr1_mii0_txd2", "uart2_rtsn", "gpio2_15"),	// update 2016.04.11
 // update 2015.02.05 uart3 update
 //	_AM33XX_MUXENTRY(LCD_DATA10, 0,
 //		"lcd_data10", "gpmc_a14", NULL, "mcasp0_axr0",
@@ -204,16 +230,20 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 //		"mcasp0_axr2", NULL, NULL, "gpio2_17"),
 	_AM33XX_MUXENTRY(LCD_DATA10, 0,
 		"lcd_data10", "gpmc_a14", NULL, "mcasp0_axr0",
-		NULL, NULL, "uart3_ctsn", "gpio2_16"),
+//		NULL, NULL, "uart3_ctsn", "gpio2_16"),
+		NULL, "pr1_mii0_txd1", "uart3_ctsn", "gpio2_16"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_DATA11, 0,
 		"lcd_data11", "gpmc_a15", NULL, "mcasp0_ahclkr",
-		"mcasp0_axr2", NULL, "uart3_rtsn", "gpio2_17"),
+//		"mcasp0_axr2", NULL, "uart3_rtsn", "gpio2_17"),
+		"mcasp0_axr2", "pr1_mii0_txd0", "uart3_rtsn", "gpio2_17"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_DATA12, 0,
 		"lcd_data12", "gpmc_a16", NULL, "mcasp0_aclkr",
-		"mcasp0_axr2", NULL, NULL, "gpio0_8"),
+//		"mcasp0_axr2", NULL, NULL, "gpio0_8"),
+		"mcasp0_axr2", "pr1_mii0_rxlink", NULL, "gpio0_8"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_DATA13, 0,
 		"lcd_data13", "gpmc_a17", NULL, "mcasp0_fsr",
-		"mcasp0_axr3", NULL, NULL, "gpio0_9"),
+//		"mcasp0_axr3", NULL, NULL, "gpio0_9"),
+		"mcasp0_axr3", "pr1_mii0_rxerr", NULL, "gpio0_9"),		// update 2016.04.11
 // update 2015.02.26 uart5 update
 //	_AM33XX_MUXENTRY(LCD_DATA14, 0,
 //		"lcd_data14", "gpmc_a18", NULL, "mcasp0_axr1",
@@ -223,10 +253,12 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 //		"mcasp0_axr3", NULL, NULL, "gpio0_11"),
 	_AM33XX_MUXENTRY(LCD_DATA14, 0,
 		"lcd_data14", "gpmc_a18", NULL, "mcasp0_axr1",
-		NULL, NULL, "uart5_ctsn", "gpio0_10"),
+//		NULL, NULL, "uart5_ctsn", "gpio0_10"),
+		NULL, "pr1_mii_mr0_clk", "uart5_ctsn", "gpio0_10"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_DATA15, 0,
 		"lcd_data15", "gpmc_a19", NULL, "mcasp0_ahclkx",
-		"mcasp0_axr3", NULL, "uart5_rtsn", "gpio0_11"),
+//		"mcasp0_axr3", NULL, "uart5_rtsn", "gpio0_11"),
+		"mcasp0_axr3", "pr1_mii0_rxdv", "uart5_rtsn", "gpio0_11"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(LCD_VSYNC, 0,
 		"lcd_vsync", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio2_22"),
@@ -234,10 +266,12 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		"lcd_hsync", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio2_23"),
 	_AM33XX_MUXENTRY(LCD_PCLK, 0,
-		"lcd_pclk", NULL, NULL, NULL,
+//		"lcd_pclk", NULL, NULL, NULL,
+		"lcd_pclk", NULL, "pr1_mii0_crs", NULL,	// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_24"),
 	_AM33XX_MUXENTRY(LCD_AC_BIAS_EN, 0,
-		"lcd_ac_bias_en", NULL, NULL, NULL,
+//		"lcd_ac_bias_en", NULL, NULL, NULL,
+		"lcd_ac_bias_en", NULL, "pr1_mii1_crs", NULL,	// update 2016.04.11
 		NULL, NULL, NULL, "gpio2_25"),
 	_AM33XX_MUXENTRY(MMC0_DAT3, 0,
 		"mmc0_dat3", NULL, NULL, NULL,
@@ -258,14 +292,17 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		"mmc0_cmd", NULL, NULL, NULL,
 		NULL, NULL, NULL, "gpio2_31"),
 	_AM33XX_MUXENTRY(MII1_COL, 0,
-		"mii1_col", "rmii2_refclk", "spi1_sclk", NULL,
+//		"mii1_col", "rmii2_refclk", "spi1_sclk", NULL,
+		"mii1_col", "rmii2_refclk", "spi1_sclk", "uart5_rxd",		//update 2016.04.11
 		"mcasp1_axr2", "mmc2_dat3", "mcasp0_axr2", "gpio3_0"),
 	_AM33XX_MUXENTRY(MII1_CRS, 0,
 		"mii1_crs", "rmii1_crs_dv", "spi1_d0", "i2c1_sda",
-		"mcasp1_aclkx", NULL, NULL, "gpio3_1"),
+//		"mcasp1_aclkx", NULL, NULL, "gpio3_1"),
+		"mcasp1_aclkx", "uart5_ctsn", NULL, "gpio3_1"),			// update 2016.04.11
 	_AM33XX_MUXENTRY(MII1_RXERR, 0,
 		"mii1_rxerr", "rmii1_rxerr", "spi1_d1", "i2c1_scl",
-		"mcasp1_fsx", NULL, NULL, "gpio3_2"),
+//		"mcasp1_fsx", NULL, NULL, "gpio3_2"),
+		"mcasp1_fsx", "uart5_rtsn", NULL, "gpio3_2"),		// update 2016.04.11
 	_AM33XX_MUXENTRY(MII1_TXEN, 0,
 		"mii1_txen", "rmii1_txen", "rgmii1_tctl", NULL,
 		"mcasp1_axr0", NULL, "mmc2_cmd", "gpio3_3"),
@@ -307,13 +344,16 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		"mii1_rxd0", "rmii1_rxd0", "rgmii1_rd0", "mcasp1_ahclkx",
 		"mcasp1_ahclkr", "mcasp1_aclkr", "mcasp0_axr3", "gpio2_21"),
 	_AM33XX_MUXENTRY(MII1_REFCLK, 0,
-		"rmii1_refclk", NULL, "spi1_cs0", NULL,
+//		"rmii1_refclk", NULL, "spi1_cs0", NULL,
+		"rmii1_refclk", NULL, "spi1_cs0", "uart5_txd",		// update 2016.04.11
 		"mcasp1_axr3", "mmc0_pow", "mcasp1_ahclkx", "gpio0_29"),
 	_AM33XX_MUXENTRY(MDIO_DATA, 0,
-		"mdio_data", NULL, NULL, NULL,
+//		"mdio_data", NULL, NULL, NULL,
+		"mdio_data", NULL, NULL, "uart3_ctsn",		// update 2016.04.11
 		"mmc0_sdcd", "mmc1_cmd", "mmc2_cmd", "gpio0_0"),
 	_AM33XX_MUXENTRY(MDIO_CLK, 0,
-		"mdio_clk", NULL, NULL, NULL,
+//		"mdio_clk", NULL, NULL, NULL,
+		"mdio_clk", NULL, NULL, "uart3_rtsn",			// update 2016.04.11
 		"mmc0_sdwp", "mmc1_clk", "mmc2_clk", "gpio0_1"),
 	_AM33XX_MUXENTRY(SPI0_SCLK, 0,
 		"spi0_sclk", "uart2_rxd", "i2c2_sda", NULL,
@@ -408,7 +448,8 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL),
 	_AM33XX_MUXENTRY(NMIN, 0,
-		"nmin", NULL, NULL, NULL,
+//		NULL, NULL, NULL, NULL,
+		"nmin", NULL, NULL, NULL,	// update 2015.03.10
 		NULL, NULL, NULL, NULL),
 	_AM33XX_MUXENTRY(XTALIN, 0,
 		NULL, NULL, NULL, NULL,
@@ -432,10 +473,12 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL),
 	_AM33XX_MUXENTRY(EMU0, 0,
-		NULL, NULL, NULL, NULL,
+//		NULL, NULL, NULL, NULL,
+		"emu0", NULL, NULL, NULL,	// update 2016.04.11
 		NULL, NULL, NULL, "gpio3_7"),
 	_AM33XX_MUXENTRY(EMU1, 0,
-		NULL, NULL, NULL, NULL,
+//		NULL, NULL, NULL, NULL,
+		"emu1", NULL, NULL, NULL,	// update 2016.04.11
 		NULL, NULL, NULL, "gpio3_8"),
 	_AM33XX_MUXENTRY(RTC_XTALIN, 0,
 		NULL, NULL, NULL, NULL,
@@ -450,7 +493,8 @@ static struct omap_mux __initdata am33xx_muxmodes[] = {
 		NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL),
 	_AM33XX_MUXENTRY(EXT_WAKEUP, 0,
-		NULL, NULL, NULL, NULL,
+//		NULL, NULL, NULL, NULL,
+		"ext_wakeup", NULL, NULL, NULL,	//update 2016.04.11
 		NULL, NULL, NULL, NULL),
 	_AM33XX_MUXENTRY(USB0_DRVVBUS, 0,
 		"usb0_drvvbus", NULL, NULL, NULL,

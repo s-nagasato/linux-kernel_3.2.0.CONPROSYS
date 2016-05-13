@@ -388,10 +388,16 @@ config MACH_MC342B00
 	CONTEC CONPROSYS CPS-MCS341-DSx Modules.
 
 config MACH_MC341B50
-	bool "CPS-MC341-DS5"
+	bool "CPS-MC341-DS1x"
 	depends on SOC_OMAPAM33XX
 	help
 	CONTEC CONPROSYS CPS-MC341-DS5 Modules.
+
+config MACH_MC342B20
+	bool "CPS-ECS341-1-1xx"
+	depends on SOC_OMAPAM33XX
+	help
+	CONTEC CONPROSYS CPS-ECS341-1-1xx Modules.( You own risk that you use CPS-ECS341-1-0xx Modules.)
 
 endchoice
 
@@ -404,13 +410,13 @@ config MACH_MC341_ENABLE_RTC_CLOCK
 
 config MACH_MC34X_ENABLE_NMI_INTERRUPT
 	bool "Enable Nmi Interrrupt"
-	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00 || MACH_MC341B50
+	depends on MACH_MC341B10 || MACH_MC341B30 || MACH_MC341B40 || MACH_MC342B00 || MACH_MC341B50 || MACH_MC342B20
 	default y
 	help
 	Enable NMI Interrupt pin.
 
 #check comments
-
+## LAN TYPE
 comment "Check LAN TYPE : 2LAN TYPE"
 	depends on ( TI_CPSW_DUAL_EMAC && VLAN_8021Q )
 
@@ -423,6 +429,15 @@ comment "Check LAN TYPE : NO-VLAN TYPE (Daisy Chain)"
 comment "Check LAN TYPE : 1LAN TYPE (Daisy Chain)"
 	depends on ( !TI_CPSW_DUAL_EMAC && VLAN_8021Q )
 
+## PRU ENABLE/DISABLE
+comment "Check UIO PRUSS Driver: Enable"
+	depends on ( UIO && UIO_PRUSS )
+
+comment "Check UIO PRUSS Driver: Error"
+	depends on ( UIO && UIO_PRUSS=n )
+
+comment "Check UIO PRUSS Driver : Disable"
+	depends on ( UIO=n && UIO_PRUSS=n )
 
 endif # CONTEC_MC34X
 
