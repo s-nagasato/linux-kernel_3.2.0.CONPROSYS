@@ -44,7 +44,9 @@
 // update 2016.01.29 Add i2c0 (CAN Board EEPROM ) for CPS-MC341-DSx and CPS-MC341-Ax
 // update 2016.03.16 Add I2C EEPROM plathome data
 //                   Add CPS-MC341-DS5(?) (tested.)
- 
+// update 2016.04.11 (1) Add ECx341 Series Pin Mapping
+// update 2016.04.11 (2) Add ECS341 GPMC Pin Mapping
+// uddate 2016.04.11 (3) Add ECS341 I2C0 ina226
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
@@ -266,17 +268,21 @@ static struct omap_board_mux board_mux[] __initdata = {
 //	{"xdma_event_intr0.spi1_cs1", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},		/* SPI1_CS1 */ // MC341LAN2
 #ifndef CONFIG_MACH_MC341B00
 	AM33XX_MUX(XDMA_EVENT_INTR0, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT), // MC341LAN2
-#endif 
+#endif
+
+
 	AM33XX_MUX(I2C0_SDA, OMAP_MUX_MODE0 | AM33XX_SLEWCTRL_SLOW |
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
 	AM33XX_MUX(I2C0_SCL, OMAP_MUX_MODE0 | AM33XX_SLEWCTRL_SLOW |
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
+
+#ifndef CONFIG_MACH_MC342B20
 // for i2c1
 	AM33XX_MUX(UART0_CTSN, OMAP_MUX_MODE3 | AM33XX_SLEWCTRL_SLOW |
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
 	AM33XX_MUX(UART0_RTSN, OMAP_MUX_MODE3 | AM33XX_SLEWCTRL_SLOW |
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
-
+#endif
 	{ .reg_offset = OMAP_MUX_TERMINATOR },
 };
 #else
@@ -476,6 +482,50 @@ static struct pinmux_config rmii2_pin_mux[] = {
 	{NULL, 0},
 };
 
+// update 2016.04.11 (1)
+//EC341 LAN0
+static struct pinmux_config ec341_pr_mii0_pin_mux[] = {
+	{"lcd_pclk.pr1_mii0_crs", OMAP_MUX_MODE2 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data15.pr1_mii0_rxdv", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data13.pr1_mii0_rxerr", OMAP_MUX_MODE2 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data1.pr1_mii0_txen", OMAP_MUX_MODE2 | AM33XX_PIN_OUTPUT},
+	{"lcd_data2.pr1_mii0_txd3", OMAP_MUX_MODE2 | AM33XX_PIN_OUTPUT},
+	{"lcd_data3.pr1_mii0_txd2", OMAP_MUX_MODE2 | AM33XX_PIN_OUTPUT},
+	{"lcd_data4.pr1_mii0_txd1", OMAP_MUX_MODE2 | AM33XX_PIN_OUTPUT},
+	{"lcd_data5.pr1_mii0_txd0", OMAP_MUX_MODE2 | AM33XX_PIN_OUTPUT},
+	{"lcd_data8.pr1_mii0_rxd3", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data9.pr1_mii0_rxd2", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data10.pr1_mii0_rxd1", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data11.pr1_mii0_rxd0", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data12.pr1_mii0_rxlink", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data0.pr1_mii_mt0_clk", OMAP_MUX_MODE2 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"lcd_data14.pr1_mii_mr0_clk", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_csn3.pr1_mdio_data", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_clk.pr1_mdio_mdclk", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT_PULLUP},
+	{NULL, 0},
+};
+
+// update 2016.04.11 (1)
+//EC341 LAN1
+static struct pinmux_config ec341_pr_mii1_pin_mux[] = {
+	{"lcd_ac_bias_en.pr1_mii1_crs", OMAP_MUX_MODE2 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a10.pr1_mii1_rxdv", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a11.pr1_mii1_rxerr", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_wpn.pr1_mii1_txen", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},
+	{"gpmc_a1.pr1_mii1_txd3", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},
+	{"gpmc_a2.pr1_mii1_txd2", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},
+	{"gpmc_a3.pr1_mii1_txd1", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},
+	{"gpmc_a4.pr1_mii1_txd0", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},
+	{"gpmc_a5.pr1_mii1_rxd3", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a6.pr1_mii1_rxd2", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a7.pr1_mii1_rxd1", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a8.pr1_mii1_rxd0", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_ben1.pr1_mii0_rxlink", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a0.pr1_mii_mt1_clk", OMAP_MUX_MODE2 | AM33XX_PIN_INPUT_PULLDOWN},
+	{"gpmc_a9.pr1_mii_mr1_clk", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLDOWN},
+	{NULL, 0},
+};
+
 
 /* Module pin mux for mmc0 */
 static struct pinmux_config mmc0_common_pin_mux[] = {
@@ -498,7 +548,7 @@ static struct pinmux_config mmc0_cd_only_pin_mux[] = {
 	{NULL, 0},
 };
 
-static struct pinmux_config mcs341_gpmc_pin_mux[] = {
+static struct pinmux_config cps_stack341_gpmc_pin_mux[] = {
 	{"gpmc_ad0.gpmc_ad0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_ad1.gpmc_ad1",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_ad2.gpmc_ad2",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
@@ -518,18 +568,47 @@ static struct pinmux_config mcs341_gpmc_pin_mux[] = {
 	{"gpmc_advn_ale.gpmc_advn_ale",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 ///// update 2015.08.20 
 //	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
-	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+///// move 2016.04.11 (2)
+//	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},	
 	{"gpmc_csn0.gpmc_csn0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
-
 
 	{"gpmc_csn1.gpmc_clk", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 ///// update 2015/08/20
 //	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
-	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
+///// move 2016.04.11 (2)
+//	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
 	{"gpmc_oen_ren.gpmc_oen_ren",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{"gpmc_wen.gpmc_wen",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{NULL, 0},
 };
+
+// update 2016.04.11 (2)
+static struct pinmux_config mcs341_gpmc_pin_mux[] = {
+	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
+	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
+	{NULL, 0},
+};
+
+// update 2016.04.11 (2)
+static struct pinmux_config ecs341_gpmc_pin_mux[] = {
+	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
+	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
+	{"gpmc_wait0.gpmc_csn4", OMAP_MUX_MODE2|AM33XX_PIN_OUTPUT},
+	{NULL, 0},
+};
+
+// pinmux for gpio based key( ECS341 )
+static struct pinmux_config ecs341_gpio_keys_pin_mux[] = {
+	{"uart0_ctsn.gpio1_8", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* 3G I/O In */
+	{NULL, 0},
+};
+// pinmux for led device( ECS341 )
+static struct pinmux_config ecs341_gpio_led_mux[] = {
+	{"uart0_rtsn.gpio1_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* 3G I/O Out */
+	{"mcasp0_ahclkx.gpio3_21", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN-RSTn */
+	{NULL, 0},
+};
+
 
 // pinmux for gpio based key( MCS341 )
 static struct pinmux_config mcs341_gpio_keys_pin_mux[] = {
@@ -601,6 +680,26 @@ static struct pinmux_config mcs341_lan2_model[] = {
 	{"mcasp0_axr1.gpio3_20", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN_SPEED_LED-B */
 	{"mcasp0_aclkr.gpio3_18", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},		/* LAN-A_INTn */
 	{"mcasp0_ahclkx.gpio3_21", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},		/* LAN-B_INTn */
+	{NULL, 0},
+};
+
+static struct pinmux_config ecs341_model[] = {
+	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* RTC_INTn */
+	{"mii1_txd3.gpio0_16", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* GPIO_INIT_END */
+	{"mii1_rxdv.gpio3_4", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* SPI1_UFM-SN */
+
+	{"mii1_rxclk.gpio3_10", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* ROM Wpn */
+	{"mii1_txclk.gpio3_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* PW_RST */
+
+	{"mcasp0_fsr.gpio3_19", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN_SPEED_LED-A */
+	{"mcasp0_axr1.gpio3_20", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN_SPEED_LED-B */
+//	{"mcasp0_ahclkx.gpio3_21", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},		/* LAN-RSTn */
+	{"lcd_vsync.gpio2_23", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* FPGA INITn */
+	{"lcd_vsync.gpio2_22", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* FPGA PRGn */
+
+	{"uart0_ctsn.gpio1_8", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* CPU-3G_IO1 */
+	{"uart0_rtsn.gpio1_9", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA},		/* CPU-3G_IO2 */
+
 	{NULL, 0},
 };
 
@@ -763,7 +862,19 @@ static void rmii1_init(int evm_id, int profile)
 	return;
 }
 
+static void pr_mii0_init(int evm_id, int profile)
+{
+	setup_pin_mux(ec341_pr_mii0_pin_mux);
+// printk(KERN_WARNING "[%s](%d)rmii1_init in!!!",__FILE__,__LINE__); // 12.23
+	return;
+}
 
+static void pr_mii1_init(int evm_id, int profile)
+{
+	setup_pin_mux(ec341_pr_mii1_pin_mux);
+// printk(KERN_WARNING "[%s](%d)rmii1_init in!!!",__FILE__,__LINE__); // 12.23
+	return;
+}
 
 /* SPI 0/1 Platform Data */
 /* SPI flash information */
@@ -975,8 +1086,10 @@ static void gpio_keys_init(int evm_id, int profile)
 {
 	int err;
 
-#ifdef CONFIG_MACH_MC342B00
+#if defined(CONFIG_MACH_MC342B00)
 	setup_pin_mux(mcs341_gpio_keys_pin_mux);
+#elif defined(CONFIG_MACH_MC342B20)
+	setup_pin_mux(ecs341_gpio_keys_pin_mux);
 #else
 	setup_pin_mux(mc341_gpio_keys_pin_mux);
 #endif
@@ -1035,6 +1148,14 @@ static struct gpio_led gpio_leds[] = {
 		.gpio			= GPIO_TO_PIN(3, 4),
 	},
 #endif
+#ifdef CONFIG_MACH_MC342B20
+	//update 2015.10.01 digital potentiometer add
+	{
+		.name			= "MC342B-20:LAN-RSTn",
+		.gpio			= GPIO_TO_PIN(3, 21),
+		.default_state	= LEDS_GPIO_DEFSTATE_OFF,
+	},
+#endif
 };
 
 static struct gpio_led_platform_data gpio_led_info = {
@@ -1052,8 +1173,10 @@ static struct platform_device leds_gpio = {
 static void gpio_led_init(int evm_id, int profile)
 {
 	int err;
-#ifdef CONFIG_MACH_MC342B00
+#if defined(CONFIG_MACH_MC342B00)
 	setup_pin_mux(mcs341_gpio_led_mux);
+#elif defined(CONFIG_MACH_MC342B20)
+	setup_pin_mux(ecs341_gpio_led_mux);
 #else
 	setup_pin_mux(mc341_gpio_led_mux);
 #endif
@@ -1204,24 +1327,45 @@ static struct pinmux_config uart3_pin_mux[] = {
 	{"lcd_data10.uart3_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},	/* UART3_CTSn 3G-CN */
 	{NULL, 0},
 };
+
+// update 2016.04.11 (1) UART3 EC Series
+static struct pinmux_config ec341_uart3_pin_mux[] = {
+	{"mii1_rxd3.uart3_rxd", OMAP_MUX_MODE1 | AM33XX_PIN_INPUT_PULLUP},/* UART3_RXD 3G-CN */
+	{"mii1_rxd2.uart3_txd", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},	/* UART3_TXD 3G-CN */
+	{"mdio_clk.uart3_rtsn", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},/* UART3_RTSn 3G-CN */
+	{"mdio_data.uart3_ctsn", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},	/* UART3_CTSn 3G-CN */
+	{NULL, 0},
+};
+
 // update 2015.02.26 uart5 update
+// update 2015.05.10 change from "uart5_***" to "lcddata**.uart5_***".
 static struct pinmux_config uart5_pin_mux[] = {
-	{"uart5_rxd", OMAP_MUX_MODE4 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RXD */
-	{"uart5_txd", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},	/* UART5_TXDN */
-//	{"uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RTSn */
-//	{"uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},	/* UART5_CTSn */
-	{"uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},/* UART5_RTSn */
-	{"uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},	/* UART5_CTSn */
+	{"lcd_data9.uart5_rxd", OMAP_MUX_MODE4 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RXD */
+	{"lcd_data8.uart5_txd", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},	/* UART5_TXDN */
+//	{"lcd_data15.uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RTSn */
+//	{"lcd_data14.uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},	/* UART5_CTSn */
+	{"lcd_data15.uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},/* UART5_RTSn */
+	{"lcd_data14.uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},	/* UART5_CTSn */
 	{NULL, 0},
 };
 
 //update 2015.07.22 uart5 rs422/rs485 type update
+// update 2015.05.10 change from "uart5_***" to "lcddata**.uart5_***".
 static struct pinmux_config uart5_rs485_pin_mux[] = {
-	{"uart5_rxd", OMAP_MUX_MODE4 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RXD */
-	{"uart5_txd", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},	/* UART5_TXDN */
-	{"uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},/* UART5_RTSn */
-	{"uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},	/* UART5_CTSn */ 
+	{"lcd_data9.uart5_rxd", OMAP_MUX_MODE4 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RXD */
+	{"lcd_data8.uart5_txd", OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT},	/* UART5_TXDN */
+	{"lcd_data15.uart5_rtsn", OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT},/* UART5_RTSn */
+	{"lcd_data14.uart5_ctsn", OMAP_MUX_MODE6 | AM33XX_PIN_INPUT_PULLUP},	/* UART5_CTSn */ 
 	{"gpmc_ad7.gpio1_7", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP}, /* UART5 full/half mode */
+	{NULL, 0},
+};
+
+// update 2016.04.11 (1) UART5 EC Series
+static struct pinmux_config ec341_uart5_pin_mux[] = {
+	{"mii1_col.uart5_rxd", OMAP_MUX_MODE3 | AM33XX_PIN_INPUT_PULLUP},/* UART5_RXD */
+	{"rmii1_refclk.uart5_txd", OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT},	/* UART5_TXD */
+	{"mii1_rxerr.uart5_rtsn", OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT},/* UART5_RTSn */
+	{"mii1_crs.uart5_ctsn", OMAP_MUX_MODE5 | AM33XX_PIN_INPUT_PULLUP},	/* UART5_CTSn */ 
 	{NULL, 0},
 };
 
@@ -1245,7 +1389,12 @@ static struct evm_dev_cfg evm_sk_dev_cfg[] = {
 	{mmc0_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
 //	{rgmii1_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
 //	{rgmii2_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
+#ifdef CONFIG_MACH_MC342B20
+	{pr_mii0_init,	DEV_ON_BASEBOARD, PROFILE_ALL}, 
+	{pr_mii1_init,	DEV_ON_BASEBOARD, PROFILE_ALL}, 
+#else	
 	{rmii1_init,	DEV_ON_BASEBOARD, PROFILE_ALL}, // take
+#endif
 	{lcdc_init,     DEV_ON_BASEBOARD, PROFILE_ALL}, // 2014.12.12
 // 1129	{enable_ecap2,     DEV_ON_BASEBOARD, PROFILE_ALL},
 //	{tsc_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
@@ -1255,7 +1404,8 @@ static struct evm_dev_cfg evm_sk_dev_cfg[] = {
 // 1129	{mcasp1_init,   DEV_ON_BASEBOARD, PROFILE_ALL},
 // update 2015.07.03
 //#ifdef CONFIG_MACH_MC341B30 // add 2015.07.03 .. see Kconfig
-#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) // change 2015.09.01
+//#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) // change 2015.09.01
+#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) || defined(CONFIG_MACH_MC342B20) // change 2016.04.11 (1)
 	{mc341_dcan_init, DEV_ON_BASEBOARD, PROFILE_ALL},
 #else
 	{uart1_wl12xx_init, DEV_ON_BASEBOARD, PROFILE_ALL}, // add 2014.12.01
@@ -1374,17 +1524,27 @@ static void setup_starterkit(void)
 	mc341_tlk110_phy_init();
 
 	// update 2015.02.04 UART3, SPI1 init
+#if defined(CONFIG_MACH_MC342B20) // ec341 and ecs341
+	setup_pin_mux(ec341_uart3_pin_mux);
+#else	 // mc341 series and mcs341 series 
 	setup_pin_mux(uart3_pin_mux);
+#endif
 	// update 2015.02.26 uart5 update
-#ifdef CONFIG_MACH_MC341B30
+//#if defined(CONFIG_MACH_MC341B30)	// update 2016.04.29 
+
+#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B50)
 	// uart5 RS422/RS485 type
 	setup_pin_mux(uart5_rs485_pin_mux);
+#elif defined(CONFIG_MACH_MC342B20)
+	setup_pin_mux(ec341_uart5_pin_mux);
 #else//
 	// uart5 RS232C type
 	setup_pin_mux(uart5_pin_mux);
 #endif
 
+#if !defined(CONFIG_MACH_MC342B20)	// MCx Series only
 	setup_pin_mux(spi1_pin_mux);
+#endif
 	
 	// update 2015.02.06 2LAN setup
 #ifdef CONFIG_MACH_MC341B00
@@ -1395,10 +1555,15 @@ static void setup_starterkit(void)
 	// if(MC341LAN2) 
 	{
 		int ret;
+#if !defined(CONFIG_MACH_MC342B20)	// MCx Series only
 		setup_pin_mux(rmii2_pin_mux);
-#ifdef CONFIG_MACH_MC342B00
+#endif
+
+#if defined(CONFIG_MACH_MC342B00) // MCS341 only
 		setup_pin_mux(mcs341_lan2_model);
-#else
+#elif defined(CONFIG_MACH_MC342B20) // ECS341 only
+		setup_pin_mux(ecs341_model);
+#else // MC341 Series only
 		setup_pin_mux(mc341_lan2_model);
 #endif
 		// 2015.02.09
@@ -1413,9 +1578,35 @@ static void setup_starterkit(void)
 	}
 #endif
 
-#ifdef CONFIG_MACH_MC342B00
+	//ESC Model
+#if defined(CONFIG_MACH_MC342B20) // ECS341 only 
+	{
+		// GPIO_INIT_END pin changed High level.After 10 miliseconds, GPIO_LAN_RST pin changed high Level.  
+		int ret;
+		msleep_interruptible( 10 ); // 10 msec sleep
+		//ret = gpio_request( GPIO_TO_PIN(3, 21), "GPIO_LAN_RST");
+		//if (!ret) {
+		//	gpio_direction_output(GPIO_TO_PIN(3, 21), 1);
+		//}else{
+		//	printk(KERN_ERR "%s: failed to request GPIO for GPIO_LAN_RSTN  port "
+		//		"gpio control: %d\n", __func__, ret);
+		//}
+		ret = gpio_request_one( GPIO_TO_PIN(3, 21), GPIOF_OUT_INIT_HIGH, "GPIO_LAN_RST");
+		if(ret) {
+			printk(KERN_ERR "%s: failed to request GPIO for GPIO_LAN_RSTN  port "
+				"gpio control: %d\n", __func__, ret);
+		}			 
+	}
+#endif
+
+#if defined(CONFIG_MACH_MC342B00) || defined(CONFIG_MACH_MC342B20)
 	// GPMC
+	setup_pin_mux(cps_stack341_gpmc_pin_mux);
+#if defined(CONFIG_MACH_MC342B00)
 	setup_pin_mux(mcs341_gpmc_pin_mux);
+#elif defined(CONFIG_MACH_MC342B20)
+	setup_pin_mux(ecs341_gpmc_pin_mux);
+#endif
 	{
 		u32 regval;
 		int show_msg=1;
@@ -1650,6 +1841,8 @@ out:
 		   __func__ , __FILE__);
 	machine_halt();
 }
+
+
 /*
 static struct at24_platform_data mc341_daughter_board_eeprom_info = {
 	.byte_len       = (256*1024) / 8,
@@ -1786,16 +1979,15 @@ static struct i2c_board_info __initdata mc341_i2c0_boardinfo[] = {
 		I2C_BOARD_INFO("rx8900", 0x32), // RTC
 	},
 // update 2015.11.05 Add Power Monitor (CPS-MCS341-DSX)
-#ifdef CONFIG_MACH_MC342B00
+//#ifdef CONFIG_MACH_MC342B00 // update 2015.04.11 (2)
+#if defined(CONFIG_MACH_MC342B00) || defined(CONFIG_MACH_MC342B20)
 	{
-//		I2C_BOARD_INFO("rtc-mcp7940", 0x6f), // RTC
 		I2C_BOARD_INFO("ina226", 0x40), // RTC
 	},
 #endif
 // update 2016.01.29 Add CAN Board EEPROM <ID's> 
 // (CPS-MC341-DS2 or CPS-MC341-DS4, CPS-MC341-A2 or CPS-MC341-DS4 )
-//#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) // change 2016.03.16 ( CPS-MC341-DS5 ? )
-#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) || defined(CONFIG_MACH_MC341B50) // change 2016.03.16 ( CPS-MC341-DS5 ? )
+#if defined(CONFIG_MACH_MC341B30) || defined(CONFIG_MACH_MC341B40) 
 	{
 		I2C_BOARD_INFO("INF-MC341-30(CAN)", 0x52),
 		.platform_data  = &mc341_childboard_eeprom_info,	// update 2016.03.16
@@ -1851,7 +2043,8 @@ static struct omap_musb_board_data musb_board_data = {
 	// .mode           = (MUSB_HOST << 4) | MUSB_OTG,
 	.mode           = (MUSB_HOST << 4) | MUSB_HOST,
 	.power		= 500,
-	.instances	= 1,
+	//.instances	= 1,
+	.instances = 2,	//2016/04/15 change usb 2host mode!
 };
 
 static int cpld_reg_probe(struct i2c_client *client,
@@ -1899,7 +2092,7 @@ static void __init mc341_i2c_init(void)
 				ARRAY_SIZE(mc341_i2c0_boardinfo));
 
 // update 2015.03.16 RFID add
-#ifndef CONFIG_MACH_MC342B00
+#if !defined(CONFIG_MACH_MC342B00) && !defined(CONFIG_MACH_MC342B20)
 	setup_pin_mux(mc341_i2c1_pin_mux);
 #endif
 
@@ -2134,6 +2327,15 @@ static void __init mc341_init(void)
 
 }
 
+static void __init ecs341_init(void)
+{
+	while( 1 );
+}
+
+static void __init ecs341_map_io(void)
+{
+}
+
 static void __init mc341_map_io(void)
 {
 	omap2_set_globals_am33xx();
@@ -2194,6 +2396,17 @@ MACHINE_START(MC341B50, "mc341b50")
 	.handle_irq	= omap3_intc_handle_irq,
 	.timer		= &omap3_am33xx_timer,
 	.init_machine	= mc341_init,
+MACHINE_END
+//CPS-ECS341
+MACHINE_START(MC342B20, "mc342b20")
+	//Maintainer: CONTEC Co.,Ltd.
+	.atag_offset	= 0x100,
+	.map_io		= ecs341_map_io,
+	.init_early	= am33xx_init_early,
+	.init_irq	= ti81xx_init_irq,
+	.handle_irq	= omap3_intc_handle_irq,
+	.timer		= &omap3_am33xx_timer,
+	.init_machine	= ecs341_init,
 MACHINE_END
 MACHINE_START(AM335XEVM, "am335xevm")
 	// Maintainer: Texas Instruments
