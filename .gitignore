@@ -56,6 +56,10 @@ modules.builtin
 !.gitignore
 !.mailmap
 
+# firmware/am335x-pm-firmware.bin file that we don't to ignore.
+# (change firmware/.gitignore too.)
+!firmware/am335x-pm-firmware.bin
+
 #
 # Generated include files
 #
