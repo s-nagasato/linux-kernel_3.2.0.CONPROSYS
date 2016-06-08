@@ -2088,6 +2088,8 @@ static void __init mc341_i2c_init(void)
 
 	evm_init_cpld();
 
+	mc341_i2c0_boardinfo[2].irq = gpio_to_irq(GPIO_TO_PIN(0,17));	// RTC_INTn
+
 	omap_register_i2c_bus(1, 100, mc341_i2c0_boardinfo,
 				ARRAY_SIZE(mc341_i2c0_boardinfo));
 
