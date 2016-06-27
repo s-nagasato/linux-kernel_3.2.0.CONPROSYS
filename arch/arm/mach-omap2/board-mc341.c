@@ -912,12 +912,59 @@ static struct mtd_partition am335x_spi_partitions[] = {
 	}
 };
 
+static struct mtd_partition am335x_spi_partitions_512mb[] = {
+	/* All the partition sizes are listed in terms of erase size */
+	{
+		.name       = "SPL",
+		.offset     = 0,			/* Offset = 0x0 */
+		.size       = SZ_128K,
+	},
+	{
+		.name       = "U-Boot",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0x20000 */
+		.size       = 4 * SZ_128K,
+	},
+	{
+		.name       = "U-Boot Env",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xa0000 */
+		.size       = 2 * SZ_128K,
+	},
+	{
+		.name       = "Kernel",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xE0000 */
+		.size       = 27 * SZ_128K,
+	},
+	{
+		.name       = "Root File System",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0x442000 */
+		.size       = 76 * SZ_128K,		/* size ~= 10 MiB */
+	},
+	{
+		.name       = "APL Area 1",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xDD0000 */
+		.size       = 146 * SZ_128K,			/* size = 20 MiB */
+	},
+	{
+		.name       = "APL Area 2",
+		.offset     = MTDPART_OFS_APPEND,
+		.size       = MTDPART_SIZ_FULL,		/* size ~= 32 MiB */
+	}
+};
+
 static const struct flash_platform_data mc341_spi_flash = {
 	// .type      = "w25q64", // org
+#ifdef CONFIG_MACH_MC34X_EQUIP_SPI_FLASH_MICRON_512MB
+	.type				= "n25q512a",
+	.parts     = am335x_spi_partitions_512mb,
+	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions_512mb),
+//	.parts     = am335x_spi_partitions,
+//	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+#else
 	.type      = "n25q256a",
-	.name      = "spi_flash",
 	.parts     = am335x_spi_partitions,
 	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+#endif
+	.name      = "spi_flash",
 };
 
 static void uart1_wl12xx_init(int evm_id, int profile)
