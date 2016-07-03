@@ -16,6 +16,7 @@
  */
 // 2016.06.10 marge source kernel 3.14
 // 2016.06.22 add n25q512a module
+// 2016.07.03 change WAIT time 40s to 480s ( N25Q512A fixed jffs2 crc error )
 
 #include <linux/init.h>
 #include <linux/err.h>
@@ -92,7 +93,10 @@
 #define CR_QUAD_EN_SPAN		0x2     /* Spansion Quad I/O */
 
 /* Define max times to check status register before we give up. */
-#define	MAX_READY_WAIT_JIFFIES	(40 * HZ)	/* M25P16 specs 40s max chip erase */
+// 2016.07.03 start
+//#define	MAX_READY_WAIT_JIFFIES	(40 * HZ)	/* M25P16 specs 40s max chip erase */ // 2016.07.02
+#define	MAX_READY_WAIT_JIFFIES	(480 * HZ)	/* N25Q512A specs 480s max chip erase */
+// 2016.07.03 end
 #define	MAX_CMD_SIZE		6
 
 #ifdef CONFIG_M25PXX_USE_FAST_READ
@@ -269,30 +273,6 @@ static inline int set_4byte(struct m25p *flash, u32 jedec_id, int enable)
 	}
 }
 
-/*
- * Service routine to read status register until ready, or timeout occurs.
- * Returns non-zero if error.
- */
-static int wait_till_ready(struct m25p *flash)
-{
-	unsigned long deadline;
-	int sr;
-
-	deadline = jiffies + MAX_READY_WAIT_JIFFIES;
-
-	do {
-		if ((sr = read_sr(flash)) < 0)
-			break;
-		else if (!(sr & SR_WIP))
-			return 0;
-
-		cond_resched();
-
-	} while (!time_after_eq(jiffies, deadline));
-
-	return 1;
-}
-
 // 2016.06.22 start
 /*
  * Service routine to read flag status register until ready, or timeout occurs.
@@ -318,6 +298,37 @@ static int wait_till_fsr_ready(struct m25p *flash)
 	return 1;
 }
 // 2016.06.22 end
+
+/*
+ * Service routine to read status register until ready, or timeout occurs.
+ * Returns non-zero if error.
+ */
+static int wait_till_ready(struct m25p *flash)
+{
+	unsigned long deadline;
+	int sr;
+
+	deadline = jiffies + MAX_READY_WAIT_JIFFIES;
+
+	do {
+		if ((sr = read_sr(flash)) < 0)
+			break;
+		else if (!(sr & SR_WIP))
+//	2016.06.22 start
+//			return 0;
+		{
+			if( flash->flag_status )
+				return wait_till_fsr_ready(flash);
+			else
+					return 0;
+		}
+// 2016.06.22 end
+		cond_resched();
+
+	} while (!time_after_eq(jiffies, deadline));
+
+	return 1;
+}
 
 /*
  * Write status Register and configuration register with 2 bytes
@@ -461,16 +472,6 @@ static int erase_sector(struct m25p *flash, u32 offset)
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash))
 		return 1;
-
-	// 2016.06.22
-	/* Flag status, Wait until finished previous write command. */
-	if( flash->flag_status ){
-		if( wait_till_fsr_ready(flash) ){
-			mutex_unlock(&flash->lock);
-			return 1;
-		}
-	}
-	// 2016.06.22
 
 	/* Send write enable, then erase commands. */
 	write_enable(flash);
@@ -723,16 +724,6 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	mutex_lock(&flash->lock);
 
-	// 2016.06.22
-	/* Flag status, Wait until finished previous write command. */
-	if( flash->flag_status ){
-		if( wait_till_fsr_ready(flash) ){
-			mutex_unlock(&flash->lock);
-			return 1;
-		}
-	}
-	// 2016.06.22
-
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash)) {
 		mutex_unlock(&flash->lock);
@@ -758,16 +749,6 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 		spi_sync(flash->spi, &m);
 
-		// 2016.06.22
-		/* Flag status, Wait until finished previous write command. */
-		if( flash->flag_status ){
-			if( wait_till_fsr_ready(flash) ){
-				mutex_unlock(&flash->lock);
-				return 1;
-			}
-		}
-		// 2016.06.22
-
 		*retlen = m.actual_length - m25p_cmdsz(flash);
 	} else {
 		u32 i;
@@ -777,16 +758,6 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 		t[1].len = page_size;
 		spi_sync(flash->spi, &m);
-
-		// 2016.06.22
-		/* Flag status, Wait until finished previous write command. */
-		if( flash->flag_status ){
-			if( wait_till_fsr_ready(flash) ){
-				mutex_unlock(&flash->lock);
-				return 1;
-			}
-		}
-		// 2016.06.22
 
 		*retlen = m.actual_length - m25p_cmdsz(flash);
 
@@ -1128,7 +1099,8 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "n25q128a11",  INFO(0x20bb18, 0, 64 * 1024,  256, 0) },
 	{ "n25q128a13",  INFO(0x20ba18, 0, 64 * 1024,  256, 0) },
 	{ "n25q256a",    INFO(0x20ba19, 0, 64 * 1024,  512, SECT_4K) },
-	{ "n25q512a",    INFO(0x20ba20, 0, 64 * 1024, 1024, SECT_4K | M25P_NO_FR | M25P80_USE_FSR) },
+//	{ "n25q512a",    INFO(0x20ba20, 0, 64 * 1024, 1024, SECT_4K | M25P_NO_FR | M25P80_USE_FSR) },
+	{ "n25q512a",    INFO(0x20ba20, 0, 64 * 1024, 1024, SECT_4K | M25P80_USE_FSR) },
 
 	/* PMC */
 	{ "pm25lv512",   INFO(0,        0, 32 * 1024,    2, SECT_4K_PMC) },
