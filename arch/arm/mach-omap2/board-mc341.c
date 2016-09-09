@@ -43,10 +43,11 @@
 //                   Add PowerMonitor for CPS-MCS341-DSx
 // update 2016.01.29 Add i2c0 (CAN Board EEPROM ) for CPS-MC341-DSx and CPS-MC341-Ax
 // update 2016.03.16 Add I2C EEPROM plathome data
-//                   Add CPS-MC341-DS5(?) (tested.)
+//                   Add CPS-MC341-DS1x(?) (tested.)
 // update 2016.04.11 (1) Add ECx341 Series Pin Mapping
 // update 2016.04.11 (2) Add ECS341 GPMC Pin Mapping
 // uddate 2016.04.11 (3) Add ECS341 I2C0 ina226
+// update 2016.09.09 (1) Add spi_find_flash_index function.( Selectable SPI-Flash ROM )
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
@@ -912,13 +913,85 @@ static struct mtd_partition am335x_spi_partitions[] = {
 	}
 };
 
+static struct mtd_partition am335x_spi_partitions_512mb[] = {
+	/* All the partition sizes are listed in terms of erase size */
+	{
+		.name       = "SPL",
+		.offset     = 0,			/* Offset = 0x0 */
+		.size       = SZ_128K,
+	},
+	{
+		.name       = "U-Boot",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0x20000 */
+		.size       = 4 * SZ_128K,
+	},
+	{
+		.name       = "U-Boot Env",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xa0000 */
+		.size       = 2 * SZ_128K,
+	},
+	{
+		.name       = "Kernel",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xE0000 */
+		.size       = 27 * SZ_128K,
+	},
+	{
+		.name       = "Root File System",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0x442000 */
+		.size       = 76 * SZ_128K,		/* size ~= 10 MiB */
+	},
+	{
+		.name       = "APL Area 1",
+		.offset     = MTDPART_OFS_APPEND,	/* Offset = 0xDD0000 */
+		.size       = 146 * SZ_128K,			/* size = 20 MiB */
+	},
+	{
+		.name       = "APL Area 2",
+		.offset     = MTDPART_OFS_APPEND,
+		.size       = MTDPART_SIZ_FULL,		/* size ~= 32 MiB */
+	}
+};
+/*
 static const struct flash_platform_data mc341_spi_flash = {
 	// .type      = "w25q64", // org
+#ifdef CONFIG_MACH_MC34X_EQUIP_SPI_FLASH_MICRON_512MB
+	.type				= "n25q512a",
+	.parts     = am335x_spi_partitions_512mb,
+	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions_512mb),
+//	.parts     = am335x_spi_partitions,
+//	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+#else
 	.type      = "n25q256a",
-	.name      = "spi_flash",
 	.parts     = am335x_spi_partitions,
 	.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+#endif
+	.name      = "spi_flash",
 };
+*/
+
+
+static const struct flash_platform_data mc341_spi_flash []= {
+		{
+				.type      = "w25q64",
+				.parts     = am335x_spi_partitions,
+				.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+				.name      = "spi_flash",
+		},
+		{
+				.type      = "n25q256a",
+				.parts     = am335x_spi_partitions,
+				.nr_parts  = ARRAY_SIZE(am335x_spi_partitions),
+				.name      = "spi_flash",
+		},
+		{
+				.type				= "n25q512a",
+				.parts     = am335x_spi_partitions_512mb,
+				.nr_parts  = ARRAY_SIZE(am335x_spi_partitions_512mb),
+				.name      = "spi_flash",
+		},
+};
+
+
 
 static void uart1_wl12xx_init(int evm_id, int profile)
 {
@@ -1194,12 +1267,25 @@ static struct pinmux_config spi0_pin_mux[] = {
 	{"mii1_rxclk.gpio3_10", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},			/* ROM_WPn */
 	{NULL, 0},
 };
+
+/*
+//Read
+static struct spi_board_info mc341_spi_find_flash =
+{
+		.modalias      = "spidev",
+		.irq           = -1,
+		.max_speed_hz  = 24000000,
+		.bus_num       = 1,
+		.chip_select   = 0,
+};
+*/
+
 static struct spi_board_info mc341_spi0_slave_info[] = {
 	{
 		.modalias      = "m25p80",
 		// .modalias      = "spidev", // for spidev
 		// .mode=SPI_MODE_3,	// for spidev
-		.platform_data = &mc341_spi_flash,
+		//.platform_data = &mc341_spi_flash[1],
 		.irq           = -1,
 		.max_speed_hz  = 24000000,
 		.bus_num       = 1,
@@ -1241,7 +1327,7 @@ static struct spi_board_info mc341b40_spi0_slave_info[] = {
 		.modalias      = "m25p80",
 		// .modalias      = "spidev", // for spidev
 		// .mode=SPI_MODE_3,	// for spidev
-		.platform_data = &mc341_spi_flash,
+		// .platform_data = &mc341_spi_flash,
 		.irq           = -1,
 		.max_speed_hz  = 24000000,
 		.bus_num       = 1,
@@ -1294,15 +1380,90 @@ static void usb1_init(int evm_id, int profile)
 	return;
 }
 
+//update 2016.09.09 (1) Add spi_flash find funciton
+static int spi_find_flash_index( struct spi_board_info *bi )
+{
+	int index = -1;
+	struct spi_master *master;
+	struct spi_device *spi;
+
+	int			tmp;
+	u8			code = 0x9f; // OPCODE_RDID
+	u8			id[5];
+	u32			jedec;
+	u16			ext_jedec;
+
+	if( bi->modalias == NULL ){
+		pr_err("spi_find_flash_index: modalias is NULL.");
+		return index;
+	}
+
+	master = spi_busnum_to_master( bi->bus_num );
+
+	if( !master ){
+		pr_err("spi_find_flash_index: Error spi_busnum_to_master");
+		return index;
+	}
+
+	spi = spi_new_device( master, bi );
+
+	if( !spi ){
+		pr_err("spi_find_flash_index: Error spi_new_device");
+		return index;
+	}
+
+	tmp = spi_write_then_read(spi, &code, 1, id, 5);
+	if (tmp < 0) {
+		pr_err("%s: error %d reading JEDEC ID\n",
+				dev_name(&spi->dev), tmp);
+		spi_unregister_device(spi);
+		return index;
+	}
+
+	jedec = id[0];
+	jedec = jedec << 8;
+	jedec |= id[1];
+	jedec = jedec << 8;
+	jedec |= id[2];
+
+	ext_jedec = id[3] << 8 | id[4];
+
+	switch( jedec ){
+	case 0x20ba19 :
+		index = 1;
+		break; // n25q256a
+	case 0x20ba20 :
+		index = 2;
+		break; // n25q512a
+	default : break;
+	}
+
+	pr_debug("spi index : %d", index);
+
+	if( index > -1 )
+		bi->platform_data = &mc341_spi_flash[index];
+
+	spi_unregister_device(spi);
+
+	return index;
+}
+
 // setup spi0
 static void spi0_init(int evm_id, int profile)
 {
 	setup_pin_mux(spi0_pin_mux);
-//update 2015.09.10 spi0_slave_info
+
+//update 2015.09.09 (1) spi_find_flash_index
 #ifdef CONFIG_MACH_MC341B40
+	if( spi_find_flash_index(&mc341b40_spi0_slave_info[0]) == -1 )
+		return ;
+
 	spi_register_board_info(mc341b40_spi0_slave_info,
 			ARRAY_SIZE(mc341b40_spi0_slave_info));
 #else
+	if( spi_find_flash_index(&mc341_spi0_slave_info[0]) == -1 )
+		return ;
+
 	spi_register_board_info(mc341_spi0_slave_info,
 			ARRAY_SIZE(mc341_spi0_slave_info));
 #endif
@@ -2087,6 +2248,8 @@ static void __init mc341_i2c_init(void)
 	// am335x_evm_id = GEN_PURP_EVM;
 
 	evm_init_cpld();
+
+	mc341_i2c0_boardinfo[2].irq = gpio_to_irq(GPIO_TO_PIN(0,17));	// RTC_INTn
 
 	omap_register_i2c_bus(1, 100, mc341_i2c0_boardinfo,
 				ARRAY_SIZE(mc341_i2c0_boardinfo));

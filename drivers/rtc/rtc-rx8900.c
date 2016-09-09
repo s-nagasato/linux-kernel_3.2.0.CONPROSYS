@@ -29,7 +29,7 @@
 //======================================================================
 // 2015.06.12 for battery backup
 // 2015.06.12 for Compensation interval Select 0,1(2sec->30sec)
-
+// 2016.06.07 add client_initialize battery set/unset checker.
 #if 0
 #define DEBUG
 #include <linux/device.h>
@@ -118,6 +118,11 @@
 #define RX8900_BTC_CTRL_CSEL1		(1 << 7)
 
 
+#define RX8900_EXT_BACKUP_BKSMP0	( 1 << 0 )
+#define RX8900_EXT_BACKUP_BKSMP1	( 1 << 1 )
+#define RX8900_EXT_BACKUP_SWOFF		( 1 << 2 )
+#define RX8900_EXT_BACKUP_VDETOFF	( 1 << 3 )
+
 static const struct i2c_device_id rx8900_id[] = {
 	{ "rx8900", 0 },
 	{ }
@@ -140,6 +145,9 @@ typedef struct {
 #define SE_RTC_REG_READ		_IOWR('p', 0x20, reg_data)		
 #define SE_RTC_REG_WRITE	_IOW('p',  0x21, reg_data)	
 
+// 2016.06.07 Init Battery Set/Unset Check
+#define SE_RTC_REG_READ_BATTERY_SETTING		_IOR('p', 0x22, reg_data) // VLF Read
+static u32 rx8900_BatteryState = 0; ///< Battery State ( 0...need check, 1... OFF, 2... ON )
 //----------------------------------------------------------------------SE_RTC_REG_READ
 // rx8900_read_reg()
 // reads a rx8900 register (see Register defines)
@@ -247,9 +255,13 @@ static void rx8900_work(struct work_struct *work)
 		
 	dev_dbg(&client->dev, "%s REG[%02xh]=>%02xh\n", __func__, RX8900_BTC_FLAG, flags);
 
-	if (flags & RX8900_BTC_FLAG_VLF)
+	if (flags & RX8900_BTC_FLAG_VLF){
 		dev_warn(&client->dev, "Data loss is detected. All registers must be initialized.\n");
-		
+		rx8900_BatteryState = 1;	//2016.06.07
+	}
+	// 本体から電源が供給されるため、タイマ監視による計測中で CPS-MC341シリーズは 電池なしでも VLFによるバッテリーの有無の検知ができない。
+	// よって、ここにelse による rx8900_BatteryState = 2は　挿入しない。
+
 	if (flags & RX8900_BTC_FLAG_VDET)
 		dev_warn(&client->dev, "Temperature compensation stop detected.\n");		
 
@@ -391,13 +403,22 @@ static int rx8900_init_client(struct i2c_client *client, int *need_reset)
 		dev_warn(&client->dev, "Temperature compensation is stop detected.\n");
 		need_clear = 1;		
 	}
-	
+
 	if ( flags & RX8900_BTC_FLAG_VLF )
 	{
 		dev_warn(&client->dev, "Data loss is detected. All registers must be initialized.\n");
 		*need_reset = 1;	
-		need_clear = 1;	
-	}	
+		need_clear = 1;
+
+		dev_info(&client->dev, " VLF equal 1 ( VBAT OFF ) \n");
+		rx8900_BatteryState = 1;	//2016.06.07 Battery OFF
+	}
+	//2016.06.07
+	else{
+		dev_info(&client->dev, " VLF equal 0 ( VBAT ON ) \n");
+		//起動時のみ この処理をいれる。
+		rx8900_BatteryState = 2;// Battery ON
+	}
 	
 	if ( flags & RX8900_BTC_FLAG_AF ){
 		dev_warn(&client->dev, "Alarm was detected\n");
@@ -663,13 +684,13 @@ static int rx8900_alarm_irq_enable(struct device *dev, unsigned int enabled)
 static int rx8900_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 {
 	struct i2c_client *client = to_i2c_client(dev);
+
 	//struct rx8900_data *rx8900 = dev_get_drvdata(dev);
 	//struct mutex *lock = &rx8900->rtc->ops_lock;
 	int ret = 0;
 	int tmp;
 	void __user *argp = (void __user *)arg;
 	reg_data reg;
-	
 	dev_dbg(dev, "%s: cmd=%x\n", __func__, cmd);
 
 	switch (cmd) {
@@ -694,7 +715,14 @@ static int rx8900_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 			ret = rx8900_write_reg(client, reg.number, reg.value);
 			//mutex_unlock(lock);
 			break;
-	
+		case SE_RTC_REG_READ_BATTERY_SETTING:	//2016.06.07 add SE_RTC_REG_READ_BATTERY_SETTING
+		//	mutex_lock(lock);
+			if( copy_to_user(argp, &rx8900_BatteryState, sizeof(u32) ) ){
+				return -EFAULT;
+			}
+		// mutex_unlock(lock);
+			break;
+
 /* 2015.04.29 
 		case RTC_VL_READ: // Voltage low detector
 			//mutex_lock(lock);
@@ -795,12 +823,12 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 			goto errout_reg;
 		}else{
 			dev_dbg(&client->dev, "%s: REG[0x%02x] => 0x%02x\n", __func__, RX8900_EXT_BACKUP, val);
-printk(KERN_INFO "RX8900_EXT_BACKUP read reg[%x]\n", val );
+			dev_info(&client->dev, "RX8900_EXT_BACKUP read reg[%x]\n", val );
 			if( 1 ){
-				if( (val & 0x8)==0 || (val & 0x4)==0 ){
-					val |= 0x8; // VDET OFF
-					val |= 0x4; // SWOFF
-printk(KERN_INFO "RX8900_EXT_BACKUP write reg[%x]\n", val );
+				if( (val & RX8900_EXT_BACKUP_VDETOFF) == 0 || (val & RX8900_EXT_BACKUP_SWOFF) == 0 ){
+					val |= RX8900_EXT_BACKUP_VDETOFF; // VDET OFF
+					val |= RX8900_EXT_BACKUP_SWOFF; // SWOFF
+					dev_info(&client->dev, "RX8900_EXT_BACKUP write reg[%x]\n", val );
 					err=rx8900_write_reg(client, RX8900_EXT_BACKUP, 0x0f & val);
 					if (err) {
 						dev_err(&client->dev, "unable to write BACKUP function\n");
@@ -819,12 +847,12 @@ printk(KERN_INFO "RX8900_EXT_BACKUP write reg[%x]\n", val );
 			goto errout_reg;
 		}else{
 			dev_dbg(&client->dev, "%s: REG[0x%02x] => 0x%02x\n", __func__, RX8900_BTC_CTRL, val);
-printk(KERN_INFO "RX8900_BTC_CTRL read reg[%x]\n", val );
+			dev_info(&client->dev, "RX8900_BTC_CTRL read reg[%x]\n", val );
 			if( 1 ){
-				if( (val & 0x80)==0 || (val & 0x40)==0 ){
-					val |= 0x80; // CSEL1
-					val |= 0x40; // CSEL0
-printk(KERN_INFO "RX8900_BTC_CTRL write reg[%x]\n", val );
+				if( (val & RX8900_BTC_CTRL_CSEL1) == 0 || (val & RX8900_BTC_CTRL_CSEL0) == 0 ){
+					val |= RX8900_BTC_CTRL_CSEL1; // CSEL1
+					val |= RX8900_BTC_CTRL_CSEL0; // CSEL0
+					dev_info(&client->dev, "RX8900_BTC_CTRL write reg[%x]\n", val );
 					err=rx8900_write_reg(client, RX8900_BTC_CTRL, 0xff & val);
 					if (err) {
 						dev_err(&client->dev, "unable to write BTC_CTRL function\n");
@@ -835,7 +863,7 @@ printk(KERN_INFO "RX8900_BTC_CTRL write reg[%x]\n", val );
 		}
 	}
 
-	if (client->irq > 0) {		
+	if (client->irq > 0) {
 		dev_info(&client->dev, "IRQ %d supplied\n", client->irq);
 		INIT_WORK(&rx8900->work, rx8900_work);
 		err = devm_request_threaded_irq(&client->dev,
