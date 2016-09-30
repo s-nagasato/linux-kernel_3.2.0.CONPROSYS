@@ -40,6 +40,13 @@
 #define	extra_checks	0
 #endif
 
+// update 2016.09.29 Change File Access Mode
+#if CONFIG_CONTEC_MC34X
+#define GPIO_ACCESS_FLAG	0666
+#else
+#define GPIO_ACCESS_FLAG	0644
+#endif
+
 /* gpio_lock prevents conflicts during gpio_desc[] table updates.
  * While any GPIO is requested, its gpio_chip is not removable;
  * each GPIO's "requested" flag serves as a lock and refcount.
@@ -260,7 +267,9 @@ static ssize_t gpio_direction_store(struct device *dev,
 	return status ? : size;
 }
 
-static /* const */ DEVICE_ATTR(direction, 0644,
+
+
+static /* const */ DEVICE_ATTR(direction, GPIO_ACCESS_FLAG,
 		gpio_direction_show, gpio_direction_store);
 
 static ssize_t gpio_value_show(struct device *dev,
@@ -317,7 +326,7 @@ static ssize_t gpio_value_store(struct device *dev,
 	return status;
 }
 
-static const DEVICE_ATTR(value, 0644,
+static const DEVICE_ATTR(value, GPIO_ACCESS_FLAG,
 		gpio_value_show, gpio_value_store);
 
 static irqreturn_t gpio_sysfs_irq(int irq, void *priv)
@@ -471,7 +480,7 @@ found:
 	return status;
 }
 
-static DEVICE_ATTR(edge, 0644, gpio_edge_show, gpio_edge_store);
+static DEVICE_ATTR(edge, GPIO_ACCESS_FLAG, gpio_edge_show, gpio_edge_store);
 
 static int sysfs_set_active_low(struct gpio_desc *desc, struct device *dev,
 				int value)
@@ -540,7 +549,7 @@ static ssize_t gpio_active_low_store(struct device *dev,
 	return status ? : size;
 }
 
-static const DEVICE_ATTR(active_low, 0644,
+static const DEVICE_ATTR(active_low, GPIO_ACCESS_FLAG,
 		gpio_active_low_show, gpio_active_low_store);
 
 static const struct attribute *gpio_attrs[] = {

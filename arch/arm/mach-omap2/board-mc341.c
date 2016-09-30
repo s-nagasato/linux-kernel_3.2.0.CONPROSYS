@@ -48,6 +48,7 @@
 // update 2016.04.11 (2) Add ECS341 GPMC Pin Mapping
 // uddate 2016.04.11 (3) Add ECS341 I2C0 ina226
 // update 2016.09.09 (1) Add spi_find_flash_index function.( Selectable SPI-Flash ROM )
+// update 2016.09.29 (1) Add MC341-ADSCX GPIO pin ( DTR, DSR, RI, DCD )
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
@@ -549,7 +550,7 @@ static struct pinmux_config mmc0_cd_only_pin_mux[] = {
 	{NULL, 0},
 };
 
-static struct pinmux_config cps_stack341_gpmc_pin_mux[] = {
+static struct pinmux_config mcs341_gpmc_pin_mux[] = {
 	{"gpmc_ad0.gpmc_ad0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_ad1.gpmc_ad1",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 	{"gpmc_ad2.gpmc_ad2",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
@@ -569,31 +570,20 @@ static struct pinmux_config cps_stack341_gpmc_pin_mux[] = {
 	{"gpmc_advn_ale.gpmc_advn_ale",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 ///// update 2015.08.20 
 //	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
-///// move 2016.04.11 (2)
-//	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},	
+	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
 	{"gpmc_csn0.gpmc_csn0",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 
 	{"gpmc_csn1.gpmc_clk", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
 ///// update 2015/08/20
 //	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
-///// move 2016.04.11 (2)
-//	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
+	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
 	{"gpmc_oen_ren.gpmc_oen_ren",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{"gpmc_wen.gpmc_wen",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT},
 	{NULL, 0},
 };
 
 // update 2016.04.11 (2)
-static struct pinmux_config mcs341_gpmc_pin_mux[] = {
-	{"gpmc_ben0_cle.gpio2_5",OMAP_MUX_MODE7|AM33XX_PIN_OUTPUT},
-	{"gpmc_csn2.gpio1_31", OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
-	{NULL, 0},
-};
-
-// update 2016.04.11 (2)
 static struct pinmux_config ecs341_gpmc_pin_mux[] = {
-	{"gpmc_ben0_cle.gpmc_ben0_cle",OMAP_MUX_MODE0|AM33XX_PIN_OUTPUT|AM33XX_PIN_INPUT},
-	{"gpmc_csn2.gpmc_be1n", OMAP_MUX_MODE1 | AM33XX_PIN_OUTPUT},
 	{"gpmc_wait0.gpmc_csn4", OMAP_MUX_MODE2|AM33XX_PIN_OUTPUT},
 	{NULL, 0},
 };
@@ -1510,6 +1500,14 @@ static struct pinmux_config uart5_pin_mux[] = {
 	{NULL, 0},
 };
 
+//update 2016.09.29 (1)
+static struct pinmux_config uart5_rs232c_pin_mux[] = {
+	{"gpmc_ad12.gpio1_12",OMAP_MUX_MODE7 | AM33XX_PIN_OUTPUT},
+	{"gpmc_ad13.gpio1_13",OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_ad14.gpio1_14",OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},
+	{"gpmc_ad15.gpio1_15",OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},
+};
+
 //update 2015.07.22 uart5 rs422/rs485 type update
 // update 2015.05.10 change from "uart5_***" to "lcddata**.uart5_***".
 static struct pinmux_config uart5_rs485_pin_mux[] = {
@@ -1701,6 +1699,10 @@ static void setup_starterkit(void)
 #else//
 	// uart5 RS232C type
 	setup_pin_mux(uart5_pin_mux);
+	//update 2016.09.29 (1) GPIO ( DCD, RI, DTR, DSR ) set
+ #if defined(CONFIG_MACH_MC341B10)
+	setup_pin_mux(uart5_rs232c_pin_mux); // GPIO ( DCD, RI, DTR, DSR )
+ #endif
 #endif
 
 #if !defined(CONFIG_MACH_MC342B20)	// MCx Series only
@@ -1762,10 +1764,8 @@ static void setup_starterkit(void)
 
 #if defined(CONFIG_MACH_MC342B00) || defined(CONFIG_MACH_MC342B20)
 	// GPMC
-	setup_pin_mux(cps_stack341_gpmc_pin_mux);
-#if defined(CONFIG_MACH_MC342B00)
 	setup_pin_mux(mcs341_gpmc_pin_mux);
-#elif defined(CONFIG_MACH_MC342B20)
+#if defined(CONFIG_MACH_MC342B20)
 	setup_pin_mux(ecs341_gpmc_pin_mux);
 #endif
 	{

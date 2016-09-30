@@ -370,7 +370,10 @@ if ($hz eq '--can') {
 	}
 
 	@val = @{$canned_values{$hz}};
-	if (!defined(@val)) {
+# 2016/09/28 This code does not build for Ubuntu 16.04. 
+	if (!@val){
+#	if (!defined(@val)) {
+
 		@val = compute_values($hz);
 	}
 	output($hz, @val);
