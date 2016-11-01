@@ -30,11 +30,20 @@
 // 2015.06.12 for battery backup
 // 2015.06.12 for Compensation interval Select 0,1(2sec->30sec)
 // 2016.06.07 add client_initialize battery set/unset checker.
+// 2016.10.27(1) Change IRQ TYPE
+//           (2) Change update interrupt from 1sec to 1min.
 #if 0
 #define DEBUG
 #include <linux/device.h>
 #undef DEBUG
 #endif 
+
+// update 2016.10.27(1) Change IRQ TYPE
+#if CONFIG_CONTEC_MC34X
+#define RX8900_IRQ_FLAGS	( IRQF_TRIGGER_FALLING | IRQF_ONESHOT )
+#else
+#define RX8900_IRQ_FLAGS	( IRQF_TRIGGER_LOW | IRQF_ONESHOT )
+#endif
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -229,11 +238,11 @@ static int rx8900_write_regs(struct i2c_client *client, u8 number, u8 length, u8
 //----------------------------------------------------------------------
 static irqreturn_t rx8900_irq(int irq, void *dev_id)
 {
+
 	struct i2c_client *client = dev_id;
 	struct rx8900_data *rx8900 = i2c_get_clientdata(client);
 	disable_irq_nosync(irq);
 	schedule_work(&rx8900->work);
-
 	return IRQ_HANDLED;
 }
 
@@ -688,7 +697,7 @@ static int rx8900_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 	//struct rx8900_data *rx8900 = dev_get_drvdata(dev);
 	//struct mutex *lock = &rx8900->rtc->ops_lock;
 	int ret = 0;
-	int tmp;
+	//int tmp;
 	void __user *argp = (void __user *)arg;
 	reg_data reg;
 	dev_dbg(dev, "%s: cmd=%x\n", __func__, cmd);
@@ -754,6 +763,34 @@ static int rx8900_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 	return ret;
 }
 
+// 2016.10.27(2) add rx8900_check_reg function
+static int rx8900_check_reg(struct i2c_client *client, u8 number, u8 flags, u8 mask, char reg_name[])
+{
+	int err = 0;
+	u8 val;
+
+	err = rx8900_read_reg(client, number, &val);
+	if (err) {
+		dev_err(&client->dev, "unable to read %s function\n", reg_name);
+		return err;
+	}
+
+	dev_dbg(&client->dev, "%s: REG[0x%02x] => 0x%02x\n", __func__,number, val);
+	dev_info(&client->dev, "%s read reg[%x]\n", reg_name, val );
+	if( (val & flags) != flags ){
+		val = (val | flags) & mask ;
+
+		dev_info(&client->dev, "%s write reg[%x]\n", reg_name, val );
+		err = rx8900_write_reg(client, number, val );
+		if (err) {
+			dev_err(&client->dev, "unable to write %s function\n", reg_name);
+			return err;
+		}
+	}
+
+	return err;
+}
+
 static struct rtc_class_ops rx8900_rtc_ops = {
 	.read_time = rx8900_get_time,
 	.set_time = rx8900_set_time,
@@ -773,7 +810,7 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 	struct i2c_adapter *adapter = to_i2c_adapter(client->dev.parent);
 	struct rx8900_data *rx8900;
 	int err, need_reset = 0;
-	
+
 	dev_dbg(&client->dev, "IRQ %d supplied\n", client->irq);
 	
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA | 
@@ -815,6 +852,7 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 	}
 
 	// 2015.06.12 for battery backup
+	/*
 	{
 		u8 val;
 		err=rx8900_read_reg(client, RX8900_EXT_BACKUP, &val);
@@ -824,21 +862,30 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 		}else{
 			dev_dbg(&client->dev, "%s: REG[0x%02x] => 0x%02x\n", __func__, RX8900_EXT_BACKUP, val);
 			dev_info(&client->dev, "RX8900_EXT_BACKUP read reg[%x]\n", val );
-			if( 1 ){
-				if( (val & RX8900_EXT_BACKUP_VDETOFF) == 0 || (val & RX8900_EXT_BACKUP_SWOFF) == 0 ){
-					val |= RX8900_EXT_BACKUP_VDETOFF; // VDET OFF
-					val |= RX8900_EXT_BACKUP_SWOFF; // SWOFF
-					dev_info(&client->dev, "RX8900_EXT_BACKUP write reg[%x]\n", val );
-					err=rx8900_write_reg(client, RX8900_EXT_BACKUP, 0x0f & val);
-					if (err) {
-						dev_err(&client->dev, "unable to write BACKUP function\n");
-						goto errout_reg;
-					}
+			if( (val & RX8900_EXT_BACKUP_VDETOFF) == 0 || (val & RX8900_EXT_BACKUP_SWOFF) == 0 ){
+				val |= RX8900_EXT_BACKUP_VDETOFF; // VDET OFF
+				val |= RX8900_EXT_BACKUP_SWOFF; // SWOFF
+				dev_info(&client->dev, "RX8900_EXT_BACKUP write reg[%x]\n", val );
+				err=rx8900_write_reg(client, RX8900_EXT_BACKUP, 0x0f & val);
+				if (err) {
+					dev_err(&client->dev, "unable to write BACKUP function\n");
+					goto errout_reg;
 				}
 			}
 		}
 	}
+	*/
+	err = rx8900_check_reg(
+			client,
+			RX8900_EXT_BACKUP,
+			(u8)(RX8900_EXT_BACKUP_VDETOFF | RX8900_EXT_BACKUP_SWOFF),
+			0x0f,
+			"RX8900_EXT_BACKUP"
+	);
+	if(err)
+		goto errout_reg;
 	// 2015.06.12 for Compensation interval Select 0,1(2sec->30sec)
+	/*
 	{
 		u8 val;
 		err=rx8900_read_reg(client, RX8900_BTC_CTRL, &val);
@@ -848,20 +895,38 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 		}else{
 			dev_dbg(&client->dev, "%s: REG[0x%02x] => 0x%02x\n", __func__, RX8900_BTC_CTRL, val);
 			dev_info(&client->dev, "RX8900_BTC_CTRL read reg[%x]\n", val );
-			if( 1 ){
-				if( (val & RX8900_BTC_CTRL_CSEL1) == 0 || (val & RX8900_BTC_CTRL_CSEL0) == 0 ){
-					val |= RX8900_BTC_CTRL_CSEL1; // CSEL1
-					val |= RX8900_BTC_CTRL_CSEL0; // CSEL0
-					dev_info(&client->dev, "RX8900_BTC_CTRL write reg[%x]\n", val );
-					err=rx8900_write_reg(client, RX8900_BTC_CTRL, 0xff & val);
-					if (err) {
-						dev_err(&client->dev, "unable to write BTC_CTRL function\n");
-						goto errout_reg;
-					}
+			if( (val & RX8900_BTC_CTRL_CSEL1) == 0 || (val & RX8900_BTC_CTRL_CSEL0) == 0 ){
+				val |= RX8900_BTC_CTRL_CSEL1; // CSEL1
+				val |= RX8900_BTC_CTRL_CSEL0; // CSEL0
+				dev_info(&client->dev, "RX8900_BTC_CTRL write reg[%x]\n", val );
+				err=rx8900_write_reg(client, RX8900_BTC_CTRL, 0xff & val);
+				if (err) {
+					dev_err(&client->dev, "unable to write BTC_CTRL function\n");
+					goto errout_reg;
 				}
 			}
 		}
 	}
+	*/
+	err = rx8900_check_reg(
+			client,
+			RX8900_BTC_CTRL,
+			(u8)(RX8900_BTC_CTRL_CSEL1 | RX8900_BTC_CTRL_CSEL0),
+			0xff,
+			"RX8900_BTC_CTRL"
+	);
+	if(err)
+		goto errout_reg;
+	// 2016.10.27(2) Change update interrupt from 1sec to 1min.
+	err = rx8900_check_reg(
+			client,
+			RX8900_BTC_EXT,
+			(u8)(RX8900_BTC_EXT_USEL),
+			0xff,
+			"RX8900_BTC_EXT"
+	);
+	if(err)
+		goto errout_reg;
 
 	if (client->irq > 0) {
 		dev_info(&client->dev, "IRQ %d supplied\n", client->irq);
@@ -870,7 +935,7 @@ static int rx8900_probe(struct i2c_client *client, const struct i2c_device_id *i
 										client->irq, 
 										NULL, 
 										rx8900_irq, 
-										IRQF_TRIGGER_LOW | IRQF_ONESHOT,
+										RX8900_IRQ_FLAGS,	//2016.10.27 (1)
 										"rx8900", 
 										client);
 

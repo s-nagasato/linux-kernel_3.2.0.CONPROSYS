@@ -428,6 +428,7 @@ struct task_struct *find_task_by_vpid(pid_t vnr)
 {
 	return find_task_by_pid_ns(vnr, current->nsproxy->pid_ns);
 }
+EXPORT_SYMBOL_GPL(find_task_by_vpid);	// 2016.10.31
 
 struct pid *get_task_pid(struct task_struct *task, enum pid_type type)
 {

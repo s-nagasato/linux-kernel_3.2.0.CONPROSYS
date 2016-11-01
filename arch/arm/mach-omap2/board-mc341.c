@@ -49,12 +49,18 @@
 // uddate 2016.04.11 (3) Add ECS341 I2C0 ina226
 // update 2016.09.09 (1) Add spi_find_flash_index function.( Selectable SPI-Flash ROM )
 // update 2016.09.29 (1) Add MC341-ADSCX GPIO pin ( DTR, DSR, RI, DCD )
+// update 2016.10.27 (1) Change GPIO(0, 22) and RTC-INTr (IRQ)
+//                   (2) Add the Checking of GPIO-IN <GPIO(2,23) > for CPS-MCS341-DS1.
+// update 2016.10.31 print the CONPROSYS build Version
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
 /*
 */
 #endif
+
+// update 2016.10.31
+#define CPS_KERNEL_VERSION "Ver.2.0.0 (build: 2016/10/31) "
 
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -86,6 +92,8 @@
 #include <linux/opp.h>
 #include <linux/skbuff.h>
 #include <linux/ti_wilink_st.h>
+
+#include <linux/irq.h>
 
 /* LCD controller is similar to DA850 */
 #include <video/da8xx-fb.h>
@@ -284,7 +292,16 @@ static struct omap_board_mux board_mux[] __initdata = {
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
 	AM33XX_MUX(UART0_RTSN, OMAP_MUX_MODE3 | AM33XX_SLEWCTRL_SLOW |
 			AM33XX_INPUT_EN | AM33XX_PIN_OUTPUT),
+	// update 2016.10.27 (1)
+	AM33XX_MUX(MII1_TXD2, OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP),
 #endif
+
+// update 2016.10.27 (2) DEBUGING GPIO-IN GPIO(2, 23)
+// ( MCS341-DS1 RESET BUTTON )
+#if 0
+	AM33XX_MUX(LCD_VSYNC, OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP), //GPIO ( 2, 23 )
+#endif
+
 	{ .reg_offset = OMAP_MUX_TERMINATOR },
 };
 #else
@@ -603,7 +620,9 @@ static struct pinmux_config ecs341_gpio_led_mux[] = {
 
 // pinmux for gpio based key( MCS341 )
 static struct pinmux_config mcs341_gpio_keys_pin_mux[] = {
-	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
+// update 2016.10.27 (1)
+	//{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
+	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},/* RTC_INTn */
 	{NULL, 0},
 };
 // pinmux for led device( MCS341 )
@@ -619,7 +638,9 @@ static struct pinmux_config mc341_gpio_keys_pin_mux[] = {
 	{"gpmc_ad2.gpio1_2", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},			/* DBG-SW4 */
 // update 2015.09.10 ( comment out ) 
 //	{"gpmc_ad7.gpmc_ad7", OMAP_MUX_MODE0 | AM33XX_PIN_INPUT}, // RS(Half/full) 2015.01.16
-	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
+	// update 2016.10.27 (1)
+	//	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT},/* RTC_INTn */
+	{"mii1_txd2.gpio0_17", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},/* RTC_INTn */
 	{NULL, 0},
 };
 
@@ -1875,6 +1896,12 @@ static void mc341_setup(struct memory_accessor *mem_acc, void *context)
 //	char tmp[10];
 
 // koko
+
+// update 2016.10.31
+	printk(KERN_INFO " ");
+	printk(KERN_INFO "*** CONPROSYS Kernel %s ***",CPS_KERNEL_VERSION);
+	printk(KERN_INFO " ");
+
 printk(KERN_INFO "mc341_setup in!!!" );
 
 	ret = mem_acc->read(mem_acc, (char *)&config_mc341,
@@ -2138,12 +2165,14 @@ static struct i2c_board_info __initdata mc341_i2c0_boardinfo[] = {
 	{
 //		I2C_BOARD_INFO("rtc-rx8900", 0x32), // RTC
 		I2C_BOARD_INFO("rx8900", 0x32), // RTC
+		.irq = OMAP_GPIO_IRQ(GPIO_TO_PIN( 0, 17 )),	// update 2016.10.27 (1)
+
 	},
 // update 2015.11.05 Add Power Monitor (CPS-MCS341-DSX)
 //#ifdef CONFIG_MACH_MC342B00 // update 2015.04.11 (2)
 #if defined(CONFIG_MACH_MC342B00) || defined(CONFIG_MACH_MC342B20)
 	{
-		I2C_BOARD_INFO("ina226", 0x40), // RTC
+		I2C_BOARD_INFO("ina226", 0x40), //
 	},
 #endif
 // update 2016.01.29 Add CAN Board EEPROM <ID's> 
@@ -2248,8 +2277,6 @@ static void __init mc341_i2c_init(void)
 	// am335x_evm_id = GEN_PURP_EVM;
 
 	evm_init_cpld();
-
-	mc341_i2c0_boardinfo[2].irq = gpio_to_irq(GPIO_TO_PIN(0,17));	// RTC_INTn
 
 	omap_register_i2c_bus(1, 100, mc341_i2c0_boardinfo,
 				ARRAY_SIZE(mc341_i2c0_boardinfo));
