@@ -61,3 +61,6 @@ obj-$(CONFIG_MWIFIEX)	+= mwifiex/
 obj-$(CONFIG_BRCMFMAC) += brcm80211/
 obj-$(CONFIG_BRCMUMAC) += brcm80211/
 obj-$(CONFIG_BRCMSMAC) += brcm80211/
+
+# update 2016.12.21 Add Realtek 8188E USB WiFi
+obj-$(CONFIG_RTL8188EU) += 8188eu-v4.3.0.8_13968/
