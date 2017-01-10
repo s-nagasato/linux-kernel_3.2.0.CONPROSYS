@@ -88,3 +88,8 @@ GTAGS
 *.orig
 *~
 \#*#
+
+
+*.1lan
+*.novlan
+*.2lan

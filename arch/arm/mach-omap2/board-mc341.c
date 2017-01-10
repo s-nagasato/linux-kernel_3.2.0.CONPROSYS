@@ -42,7 +42,7 @@
 // update 2015.11.05 Add EEPROM Modules for I2C0 and I2C1
 //                   Add PowerMonitor for CPS-MCS341-DSx
 // update 2016.01.29 Add i2c0 (CAN Board EEPROM ) for CPS-MC341-DSx and CPS-MC341-Ax
-// update 2016.03.16 Add I2C EEPROM plathome data
+// update 2016.03.16 Add I2C EEPROM platform data
 //                   Add CPS-MC341-DS1x(?) (tested.)
 // update 2016.04.11 (1) Add ECx341 Series Pin Mapping
 // update 2016.04.11 (2) Add ECS341 GPMC Pin Mapping
@@ -51,7 +51,9 @@
 // update 2016.09.29 (1) Add MC341-ADSCX GPIO pin ( DTR, DSR, RI, DCD )
 // update 2016.10.27 (1) Change GPIO(0, 22) and RTC-INTr (IRQ)
 //                   (2) Add the Checking of GPIO-IN <GPIO(2,23) > for CPS-MCS341-DS1.
-// update 2016.10.31 print the CONPROSYS build Version
+// update 2016.10.31 Ver.2.0.0 print the CONPROSYS build Version
+// update 2016.12.16 Ver.2.0.1 Change UART5 DTR Signal is high level.
+// update 2016.12.27 Ver.2.0.2 Change omap_serial.c (Not change this source.)
 //#define MC341LAN2 (1)
 #define MC341
 #ifndef MC341
@@ -60,7 +62,7 @@
 #endif
 
 // update 2016.10.31
-#define CPS_KERNEL_VERSION "Ver.2.0.0 (build: 2016/10/31) "
+#define CPS_KERNEL_VERSION "Ver.2.0.2 (build: 2016/12/27) "
 
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -1687,6 +1689,7 @@ static void setup_starterkit(void)
 {
 // koko
 // printk(KERN_WARNING "[%s](%d)setup force!!!", __FILE__,__LINE__ );
+	int ret;
 
 	pr_info("The board is a AM335x Starter Kit.\n");
 
@@ -1717,13 +1720,22 @@ static void setup_starterkit(void)
 	setup_pin_mux(uart5_rs485_pin_mux);
 #elif defined(CONFIG_MACH_MC342B20)
 	setup_pin_mux(ec341_uart5_pin_mux);
-#else//
+#elif defined(CONFIG_MACH_MC341B10)
+	//update 2016.09.29 (1) GPIO ( DCD, RI, DTR, DSR ) set
+	setup_pin_mux(uart5_rs232c_pin_mux); // GPIO ( DCD, RI, DTR, DSR )
+	//update 2016.12.16 GPIO DTR sets high.
+
+	#define GPIO_UART5_DTR_PIN GPIO_TO_PIN(1, 12)
+	ret = gpio_request(GPIO_UART5_DTR_PIN, "GPIO_UART5_DTR_PIN");
+	if (!ret) {
+		gpio_direction_output(GPIO_UART5_DTR_PIN, 1);
+	}else{
+		printk(KERN_ERR "%s: failed to request GPIO for GPIO_UART5_DTR_PIN port "
+           "gpio control: %d\n", __func__, ret);
+	}
+#else
 	// uart5 RS232C type
 	setup_pin_mux(uart5_pin_mux);
-	//update 2016.09.29 (1) GPIO ( DCD, RI, DTR, DSR ) set
- #if defined(CONFIG_MACH_MC341B10)
-	setup_pin_mux(uart5_rs232c_pin_mux); // GPIO ( DCD, RI, DTR, DSR )
- #endif
 #endif
 
 #if !defined(CONFIG_MACH_MC342B20)	// MCx Series only
@@ -1738,7 +1750,7 @@ static void setup_starterkit(void)
 	// LAN 2 model
 	// if(MC341LAN2) 
 	{
-		int ret;
+//		int ret;
 #if !defined(CONFIG_MACH_MC342B20)	// MCx Series only
 		setup_pin_mux(rmii2_pin_mux);
 #endif
@@ -1766,7 +1778,7 @@ static void setup_starterkit(void)
 #if defined(CONFIG_MACH_MC342B20) // ECS341 only 
 	{
 		// GPIO_INIT_END pin changed High level.After 10 miliseconds, GPIO_LAN_RST pin changed high Level.  
-		int ret;
+//		int ret;
 		msleep_interruptible( 10 ); // 10 msec sleep
 		//ret = gpio_request( GPIO_TO_PIN(3, 21), "GPIO_LAN_RST");
 		//if (!ret) {

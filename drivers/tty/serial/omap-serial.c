@@ -519,10 +519,12 @@ static unsigned int serial_omap_get_mctrl(struct uart_port *port)
 	return ret;
 }
 
+// update 2016.12.27 Not setting mctrl without TIOCM_*.
+// merged kernel 4.9.
 static void serial_omap_set_mctrl(struct uart_port *port, unsigned int mctrl)
 {
 	struct uart_omap_port *up = (struct uart_omap_port *)port;
-	unsigned char mcr = 0;
+	unsigned char mcr = 0, old_mcr, lcr;
 
 	dev_dbg(up->port.dev, "serial_omap_set_mctrl+%d\n", up->port.line);
 	if (mctrl & TIOCM_RTS)
@@ -537,7 +539,9 @@ static void serial_omap_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		mcr |= UART_MCR_LOOP;
 
 	pm_runtime_get_sync(&up->pdev->dev);
+/*
 	up->mcr = serial_in(up, UART_MCR);
+
 	if( TIOCSRS485_mode[up->pdev->id] )
 	{
 		unsigned char w_mcr = 0;
@@ -551,8 +555,16 @@ static void serial_omap_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		w_mcr=0;
 	}
 	up->mcr |= mcr;
+*/
+	old_mcr = serial_in(up, UART_MCR);
+	old_mcr &= ~(UART_MCR_LOOP | UART_MCR_OUT2 | UART_MCR_OUT1 |
+					UART_MCR_DTR | UART_MCR_RTS);
+	up->mcr = old_mcr | mcr;
+
 	serial_out(up, UART_MCR, up->mcr);
-	pm_runtime_put(&up->pdev->dev);
+	// pm_runtime_put(&up->pdev->dev);
+	pm_runtime_mark_last_busy(&up->pdev->dev);
+	pm_runtime_put_autosuspend(&up->pdev->dev);
 }
 
 static void serial_omap_break_ctl(struct uart_port *port, int break_state)
